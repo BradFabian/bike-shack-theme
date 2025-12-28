@@ -45,7 +45,7 @@ class CartDrawer extends HTMLElement {
     );
 
     document.body.classList.add('overflow-hidden');
-    
+    /*
     // *** custom code
     const drawerHeading = this.querySelector('.drawer__heading');
     setTimeout(function(){
@@ -55,6 +55,7 @@ class CartDrawer extends HTMLElement {
       drawerHeading.style.color = 'white';
     }, 6000);
     // *** custom code ends
+    */
   }
 
   close() {
