@@ -676,6 +676,22 @@
         "name": "Contact form"
       }
     },
+    "custom_collection": {
+      "name": "Custom Collection",
+      "settings": {
+        "collection": {
+          "label": "Collection",
+          "info": "Used on pages that aren't collection pages. On a collection page, that page's collection is shown instead."
+        },
+        "accent_color": {
+          "label": "Accent color",
+          "info": "Used for prices, star ratings and the card outline on hover."
+        }
+      },
+      "presets": {
+        "name": "Custom Collection"
+      }
+    },
     "custom-liquid": {
       "name": "Custom Liquid",
       "settings": {
