@@ -1,0 +1,328 @@
+/*
+  Custom Collection — helmet grid
+  Section: sections/section-custom-collection.liquid
+  Card:    snippets/card-helmet.liquid
+
+  Frame proportions come from the reference SVGs, with the notch widened to fit name + price:
+  - desktop (≥750px): viewBox 407×411, notch starts at x 173 / y 372.5
+  - mobile (<750px):  viewBox 187×188, notch starts at x 48.7 / y 170.1
+*/
+
+.helmet-clip-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.custom-collection__editor-message {
+  margin: 0 auto;
+  text-align: center;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+/* Grid */
+
+helmet-grid-parallax {
+  display: block;
+}
+
+.helmet-grid {
+  --helmet-columns: 2;
+  --helmet-gap: 1.2rem;
+  --helmet-rating-space: 0rem;
+  display: grid;
+  grid-template-columns: repeat(var(--helmet-columns), minmax(0, 1fr));
+  column-gap: var(--helmet-gap);
+  row-gap: calc(var(--helmet-gap) + var(--helmet-rating-space));
+  margin: 0;
+  padding: 0 0 var(--helmet-rating-space);
+  list-style: none;
+}
+
+/* The rating row sits below the card's notch, so reserve room for it */
+.helmet-grid--has-rating {
+  --helmet-rating-space: 2.4rem;
+}
+
+@media screen and (min-width: 750px) {
+  .helmet-grid {
+    --helmet-columns: 3;
+    --helmet-gap: 2rem;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .helmet-grid {
+    --helmet-gap: 2.4rem;
+    /* Room below the last row for the staggered columns (~35% of a card) and parallax drift (4rem) */
+    padding-bottom: calc(
+      (100% - (var(--helmet-columns) - 1) * var(--helmet-gap)) / var(--helmet-columns) * 0.354 + 4rem +
+        var(--helmet-rating-space)
+    );
+  }
+
+  .helmet-grid--4-col-desktop {
+    --helmet-columns: 4;
+  }
+
+  .helmet-grid--3-col-desktop {
+    --helmet-columns: 3;
+  }
+
+  /* --helmet-parallax-offset is set on <helmet-grid-parallax> by custom-collection.js */
+  .helmet-grid__item--offset .helmet-card__inner {
+    --helmet-stagger: 35%;
+    --helmet-parallax: var(--helmet-parallax-offset, 0px);
+    will-change: transform;
+  }
+}
+
+/* Card */
+
+.helmet-card {
+  --helmet-reveal-ease: cubic-bezier(0.62, 0.05, 0.12, 1);
+  --helmet-reveal-in: 1.2s;
+  --helmet-reveal-out: 0.9s;
+  display: block;
+  color: rgb(var(--color-foreground));
+  text-decoration: none;
+}
+
+.helmet-card:focus-visible {
+  outline: none;
+}
+
+.helmet-card__inner {
+  position: relative;
+  aspect-ratio: 187 / 188;
+  transform: translate3d(0, calc(var(--helmet-stagger, 0%) + var(--helmet-parallax, 0px)), 0);
+}
+
+@media screen and (min-width: 750px) {
+  .helmet-card__inner {
+    aspect-ratio: 407 / 411;
+  }
+}
+
+/* Frame outline */
+
+.helmet-card__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  color: rgba(var(--color-foreground), 0.3);
+  pointer-events: none;
+  transition: color var(--helmet-reveal-out) var(--helmet-reveal-ease);
+}
+
+.helmet-card__frame svg {
+  display: block;
+  overflow: visible;
+}
+
+.helmet-card__frame--desktop {
+  display: none;
+}
+
+@media screen and (min-width: 750px) {
+  .helmet-card__frame--desktop {
+    display: block;
+  }
+
+  .helmet-card__frame--mobile {
+    display: none;
+  }
+}
+
+/* Media — clipped to the notched shape via the section's clip-path rules */
+
+.helmet-card__media {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.helmet-card__image {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 72%;
+  object-fit: contain;
+  transition: transform var(--helmet-reveal-out) var(--helmet-reveal-ease),
+    opacity var(--helmet-reveal-out) var(--helmet-reveal-ease);
+}
+
+.helmet-card__placeholder {
+  fill: rgba(var(--color-foreground), 0.3);
+}
+
+/*
+  Lifestyle image: a wide oval anchored to the top edge. It grows downward with a curved lower
+  edge while the image settles from a slight zoom, and the helmet sinks and fades out beneath it.
+*/
+.helmet-card__reveal {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.1);
+  transform-origin: 50% 0;
+  -webkit-clip-path: ellipse(110% 0% at 50% 0%);
+  clip-path: ellipse(110% 0% at 50% 0%);
+  transition: clip-path var(--helmet-reveal-out) var(--helmet-reveal-ease),
+    -webkit-clip-path var(--helmet-reveal-out) var(--helmet-reveal-ease),
+    transform var(--helmet-reveal-out) var(--helmet-reveal-ease);
+}
+
+/* Hover only on devices that really hover, so a tap on mobile doesn't leave a stuck state */
+@media (hover: hover) {
+  .helmet-card:hover .helmet-card__frame {
+    color: var(--helmet-accent);
+    transition-duration: var(--helmet-reveal-in);
+  }
+
+  .helmet-card:hover .helmet-card__reveal {
+    transform: scale(1);
+    -webkit-clip-path: ellipse(130% 125% at 50% 0%);
+    clip-path: ellipse(130% 125% at 50% 0%);
+    transition-duration: var(--helmet-reveal-in);
+  }
+
+  .helmet-card--has-reveal:hover .helmet-card__image {
+    transform: translateY(4%) scale(0.96);
+    opacity: 0;
+    transition-duration: var(--helmet-reveal-in);
+  }
+}
+
+.helmet-card:focus-visible .helmet-card__frame {
+  color: var(--helmet-accent);
+  transition-duration: var(--helmet-reveal-in);
+}
+
+.helmet-card:focus-visible .helmet-card__reveal {
+  transform: scale(1);
+  -webkit-clip-path: ellipse(130% 125% at 50% 0%);
+  clip-path: ellipse(130% 125% at 50% 0%);
+  transition-duration: var(--helmet-reveal-in);
+}
+
+.helmet-card--has-reveal:focus-visible .helmet-card__image {
+  transform: translateY(4%) scale(0.96);
+  opacity: 0;
+  transition-duration: var(--helmet-reveal-in);
+}
+
+/* Info notch — row 1 sits inside the notch, the rating row hangs just below the card */
+
+.helmet-card__info {
+  position: absolute;
+  top: 90.5%;
+  left: 27.5%;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+@media screen and (min-width: 750px) {
+  .helmet-card__info {
+    top: 90.6%;
+    left: 44%;
+    font-size: 1.4rem;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .helmet-card__info {
+    font-size: 1.5rem;
+  }
+}
+
+.helmet-card__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  max-width: 100%;
+  padding-top: 0.4em;
+}
+
+.helmet-card__title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-body-family);
+  font-size: inherit;
+  font-weight: var(--font-body-weight);
+  letter-spacing: 0.02em;
+  color: rgb(var(--color-foreground));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Price */
+
+.helmet-card__price {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 0.5rem;
+  letter-spacing: 0.02em;
+  color: var(--helmet-accent);
+  white-space: nowrap;
+}
+
+.helmet-card__price-compare {
+  font-size: 0.85em;
+  color: rgba(var(--color-foreground), 0.6);
+}
+
+.helmet-card__sold-out {
+  padding: 0.1rem 0.6rem;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.6);
+  border-radius: 0.4rem;
+  color: rgb(var(--color-foreground));
+  font-size: 0.75em;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+/* Rating */
+
+.helmet-card__rating {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.helmet-card .rating-star {
+  --color-rating-star: var(--helmet-accent);
+  --letter-spacing: 0.1;
+  --font-size: 1.3;
+}
+
+.helmet-card .rating-count {
+  font-size: 1.1rem;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+/* Reduced motion: instant swap (the parallax script also switches itself off) */
+
+@media (prefers-reduced-motion: reduce) {
+  .helmet-card__frame,
+  .helmet-card__image,
+  .helmet-card__reveal {
+    transition: none;
+  }
+}
