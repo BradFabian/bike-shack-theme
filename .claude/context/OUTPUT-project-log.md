@@ -40,3 +40,25 @@ The implementation plan and the Round 1 QA checklist are written. There are 10 b
 - The parallax component lives inside `#ProductGridContainer`, so it re-initialises when `facets.js` re-renders the grid.
 
 **To verify early:** `paginate` on a picker collection outside collection templates, and Safari clip-path rendering.
+
+## 2026-10-28 — Built: Custom Collection (awaiting QA)
+
+**New files:**
+- `sections/section-custom-collection.liquid`
+- `snippets/card-helmet.liquid`
+- `assets/section-custom-collection.css`
+- `assets/custom-collection.js`
+
+**Locales:** added `sections.custom_collection.*` to `en.default.json` and `en.default.schema.json`. Other labels reuse the existing `main-collection-product-grid` keys.
+
+**Decisions:**
+- The rating row hangs below the card because the notch only fits one row.
+- The facet IDs are only output on collection pages.
+
+**Not yet rendered:** there's no Shopify CLI locally, so QA needs `shopify theme dev` or an unpublished theme.
+
+## 2026-11-03 — Custom Collection: products per page default
+
+Changed the `products_per_page` default from 24 to 8, at the user's request. This supersedes the "24 per page" decision in `feature.md`. It's still a client-editable setting (4–24).
+
+**Watch:** a section already saved in the theme editor keeps its stored value, so it won't pick up the new default.

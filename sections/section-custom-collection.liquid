@@ -1,0 +1,373 @@
+{% comment %}
+  Custom Collection — helmet-style product grid.
+  Spec: .claude/features/full_helmet_collection/feature.md
+
+  - On collection pages: shows the page's collection, with Dawn filters, sorting and pagination.
+  - Anywhere else: shows the collection picked in the section settings (no filters).
+
+  IMPORTANT: on collection pages this section outputs the same element IDs that facets.js
+  looks for (#ProductGridContainer, #product-grid, #ProductCount). Don't use it on the same
+  page as the default "Product grid" section, or twice on the same collection page.
+{% endcomment %}
+
+{{ 'section-custom-collection.css' | asset_url | stylesheet_tag }}
+{{ 'template-collection.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.show_rating -%}
+  {{ 'component-rating.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+<script src="{{ 'custom-collection.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .custom-collection-{{ section.id }} {
+    --helmet-accent: {{ section.settings.accent_color }};
+  }
+
+  .custom-collection-{{ section.id }} .helmet-card__media {
+    -webkit-clip-path: url(#HelmetClipMobile-{{ section.id }});
+    clip-path: url(#HelmetClipMobile-{{ section.id }});
+  }
+
+  @media screen and (min-width: 750px) {
+    .custom-collection-{{ section.id }} .helmet-card__media {
+      -webkit-clip-path: url(#HelmetClipDesktop-{{ section.id }});
+      clip-path: url(#HelmetClipDesktop-{{ section.id }});
+    }
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  # The global `collection` also exists on product pages reached through a collection,
+  # so check the template name as well.
+  assign is_collection_page = false
+  if template.name == 'collection' and collection != blank
+    assign is_collection_page = true
+    assign helmet_collection = collection
+  else
+    assign helmet_collection = section.settings.collection
+  endif
+
+  assign show_facets = false
+  if is_collection_page
+    if section.settings.enable_filtering or section.settings.enable_sorting
+      assign show_facets = true
+    endif
+  endif
+
+  # In a vertical sidebar layout the grid is narrower: 3 columns on desktop instead of 4.
+  assign columns_desktop = 4
+  if show_facets and section.settings.filter_type == 'vertical'
+    assign columns_desktop = 3
+  endif
+-%}
+
+{%- comment -%}
+  Clip shapes for the notched frame, scaled to 0–1 so they fit any card size.
+  Paths come from the reference SVGs (desktop viewBox 407×411, mobile 187×188).
+{%- endcomment -%}
+<svg class="helmet-clip-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <clipPath id="HelmetClipDesktop-{{ section.id }}" clipPathUnits="objectBoundingBox">
+      <path transform="scale(0.0024570 0.0024331)" d="M8 .5h390.89a7.5 7.5 0 0 1 7.5 7.5v356.983a7.5 7.5 0 0 1-7.5 7.5H263.329a23.502 23.502 0 0 0-18.375 8.849l-16.499 20.695a22.502 22.502 0 0 1-17.593 8.473H8A7.5 7.5 0 0 1 .5 403V8A7.5 7.5 0 0 1 8 .5Z"/>
+    </clipPath>
+    <clipPath id="HelmetClipMobile-{{ section.id }}" clipPathUnits="objectBoundingBox">
+      <path transform="scale(0.0053476 0.0053191)" d="M8 .5h170.12a7.5 7.5 0 0 1 7.5 7.5v154.61a7.5 7.5 0 0 1-7.5 7.5H60.681a10.5 10.5 0 0 0-8.21 3.954l-7.86 9.858a9.5 9.5 0 0 1-7.427 3.578H8A7.5 7.5 0 0 1 .5 180V8A7.5 7.5 0 0 1 8 .5Z"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<div class="custom-collection custom-collection-{{ section.id }} color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
+  {%- if helmet_collection == blank -%}
+    {%- if request.design_mode -%}
+      <p class="custom-collection__editor-message page-width">{{ 'sections.custom_collection.no_collection' | t }}</p>
+    {%- endif -%}
+  {%- elsif helmet_collection.all_products_count == 0 -%}
+    {%- if request.design_mode -%}
+      <p class="custom-collection__editor-message page-width">{{ 'sections.custom_collection.empty' | t }}</p>
+    {%- endif -%}
+  {%- else -%}
+    {%- paginate helmet_collection.products by section.settings.products_per_page -%}
+      {%- if show_facets -%}
+        {{ 'component-facets.css' | asset_url | stylesheet_tag }}
+        <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
+        {% comment %} Sort is the first tabbable element when filter type is vertical (same as Dawn's grid) {% endcomment %}
+        {%- if section.settings.enable_sorting and section.settings.filter_type == 'vertical' -%}
+          <facet-filters-form class="facets facets-vertical-sort page-width small-hide no-js-hidden">
+            <form class="facets-vertical-form" id="FacetSortForm">
+              <div class="facet-filters sorting caption">
+                <div class="facet-filters__field">
+                  <h2 class="facet-filters__label caption-large text-body">
+                    <label for="SortBy">{{ 'products.facets.sort_by_label' | t }}</label>
+                  </h2>
+                  <div class="select">
+                    {%- assign sort_by = helmet_collection.sort_by | default: helmet_collection.default_sort_by -%}
+                    <select
+                      name="sort_by"
+                      class="facet-filters__sort select__select caption-large"
+                      id="SortBy"
+                      aria-describedby="a11y-refresh-page-message"
+                    >
+                      {%- for option in helmet_collection.sort_options -%}
+                        <option
+                          value="{{ option.value | escape }}"
+                          {% if option.value == sort_by %}
+                            selected="selected"
+                          {% endif %}
+                        >
+                          {{ option.name | escape }}
+                        </option>
+                      {%- endfor -%}
+                    </select>
+                    {% render 'icon-caret' %}
+                  </div>
+                </div>
+                <noscript>
+                  <button type="submit" class="facets__button-no-js button button--secondary">
+                    {{ 'products.facets.sort_button' | t }}
+                  </button>
+                </noscript>
+              </div>
+
+              <div class="product-count-vertical light" role="status">
+                <h2 class="product-count__text text-body">
+                  <span id="ProductCountDesktop">
+                    {%- if helmet_collection.results_count -%}
+                      {{
+                        'templates.search.results_with_count'
+                        | t: terms: helmet_collection.terms, count: helmet_collection.results_count
+                      }}
+                    {%- elsif helmet_collection.products_count == helmet_collection.all_products_count -%}
+                      {{ 'products.facets.product_count_simple' | t: count: helmet_collection.products_count }}
+                    {%- else -%}
+                      {{
+                        'products.facets.product_count'
+                        | t: product_count: helmet_collection.products_count, count: helmet_collection.all_products_count
+                      }}
+                    {%- endif -%}
+                  </span>
+                </h2>
+                {%- render 'loading-spinner' -%}
+              </div>
+            </form>
+          </facet-filters-form>
+        {%- endif -%}
+      {%- endif -%}
+
+      <div class="{% if show_facets and section.settings.filter_type == 'vertical' %} facets-vertical page-width{% endif %}">
+        {%- if show_facets -%}
+          <aside
+            aria-labelledby="verticalTitle"
+            class="facets-wrapper{% unless section.settings.enable_filtering %} facets-wrapper--no-filters{% endunless %}{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
+            id="main-collection-filters"
+            data-id="{{ section.id }}"
+          >
+            {% render 'facets',
+              results: helmet_collection,
+              enable_filtering: section.settings.enable_filtering,
+              enable_sorting: section.settings.enable_sorting,
+              filter_type: section.settings.filter_type,
+              paginate: paginate
+            %}
+          </aside>
+        {%- endif -%}
+
+        <div
+          class="product-grid-container custom-collection__grid-container"
+          {% if is_collection_page %}
+            id="ProductGridContainer"
+          {% endif %}
+        >
+          {%- if helmet_collection.products.size == 0 -%}
+            {% comment %} Only reachable on collection pages when filters match nothing {% endcomment %}
+            <div
+              class="collection collection--empty page-width"
+              {% if is_collection_page %}
+                id="product-grid" data-id="{{ section.id }}"
+              {% endif %}
+            >
+              <div class="loading-overlay gradient"></div>
+              <div class="title-wrapper center">
+                <h2 class="title title--primary">
+                  {{ 'sections.collection_template.empty' | t -}}
+                  <br>
+                  {{
+                    'sections.collection_template.use_fewer_filters_html'
+                    | t: link: helmet_collection.url, class: 'underlined-link link'
+                  }}
+                </h2>
+              </div>
+            </div>
+          {%- else -%}
+            <div class="collection{% unless show_facets and section.settings.filter_type == 'vertical' %} page-width{% endunless %}">
+              <div class="loading-overlay gradient"></div>
+              <helmet-grid-parallax>
+                <ul
+                  class="helmet-grid helmet-grid--{{ columns_desktop }}-col-desktop{% if section.settings.show_rating %} helmet-grid--has-rating{% endif %}"
+                  {% if is_collection_page %}
+                    id="product-grid" data-id="{{ section.id }}"
+                  {% endif %}
+                  role="list"
+                >
+                  {%- for product in helmet_collection.products -%}
+                    {%- liquid
+                      # Columns 2 and 4 are pushed down on desktop (column 2 only with a sidebar).
+                      assign column = forloop.index0 | modulo: columns_desktop
+                      assign is_offset = false
+                      if column == 1 or column == 3
+                        assign is_offset = true
+                      endif
+
+                      assign lazy_load = true
+                      if forloop.index <= columns_desktop
+                        assign lazy_load = false
+                      endif
+                    -%}
+                    <li class="helmet-grid__item{% if is_offset %} helmet-grid__item--offset{% endif %}">
+                      {% render 'card-helmet',
+                        card_product: product,
+                        show_rating: section.settings.show_rating,
+                        lazy_load: lazy_load
+                      %}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </helmet-grid-parallax>
+
+              {%- if paginate.pages > 1 -%}
+                {% render 'pagination', paginate: paginate, anchor: '' %}
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endpaginate -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.custom_collection.name",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "t:sections.custom_collection.settings.collection.label",
+      "info": "t:sections.custom_collection.settings.collection.info"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 4,
+      "max": 24,
+      "step": 4,
+      "default": 8,
+      "label": "t:sections.main-collection-product-grid.settings.products_per_page.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "t:sections.custom_collection.settings.accent_color.label",
+      "info": "t:sections.custom_collection.settings.accent_color.info",
+      "default": "#d2ff00"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "default": true,
+      "label": "t:sections.main-collection-product-grid.settings.show_rating.label",
+      "info": "t:sections.main-collection-product-grid.settings.show_rating.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main-collection-product-grid.settings.header__1.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "default": true,
+      "label": "t:sections.main-collection-product-grid.settings.enable_filtering.label",
+      "info": "t:sections.main-collection-product-grid.settings.enable_filtering.info"
+    },
+    {
+      "type": "select",
+      "id": "filter_type",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:sections.main-collection-product-grid.settings.filter_type.options__1.label"
+        },
+        {
+          "value": "vertical",
+          "label": "t:sections.main-collection-product-grid.settings.filter_type.options__2.label"
+        },
+        {
+          "value": "drawer",
+          "label": "t:sections.main-collection-product-grid.settings.filter_type.options__3.label"
+        }
+      ],
+      "default": "horizontal",
+      "label": "t:sections.main-collection-product-grid.settings.filter_type.label",
+      "info": "t:sections.main-collection-product-grid.settings.filter_type.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "default": true,
+      "label": "t:sections.main-collection-product-grid.settings.enable_sorting.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.custom_collection.presets.name"
+    }
+  ]
+}
+{% endschema %}

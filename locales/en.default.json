@@ -333,6 +333,10 @@
       "title": "Collection",
       "use_fewer_filters_html": "Use fewer filters or <a class=\"{{ class }}\" href=\"{{ link }}\">remove all</a>"
     },
+    "custom_collection": {
+      "no_collection": "Select a collection in the section settings to display products.",
+      "empty": "This collection has no products yet."
+    },
     "video": {
       "load_video": "Load video: {{ description }}"
     },

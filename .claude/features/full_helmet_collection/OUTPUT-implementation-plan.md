@@ -395,3 +395,22 @@ No templates, no Dawn core JS/CSS, and no existing snippets are modified.
 ## Open Questions
 
 - Which review app (if any) populates `reviews.rating`. Can be confirmed during QA.
+
+## Implementation Notes (2026-10-28)
+
+Build steps 1–10 are implemented. Nothing has been rendered yet: there's no Shopify CLI on this machine, so visual checks happen in QA. Static checks passed: JS syntax, schema JSON, all `t:` and storefront translation keys resolve, no `console.log`s.
+
+**Differences from the plan:**
+- **Rating row placement.** The notch is only ~9.4% of the card height (~35px desktop, ~16px mobile), so only the name + price row fits inside it. The stars row hangs just below the card's bottom edge, right-aligned. The grid adds row space (`--helmet-rating-space`) when ratings are enabled.
+- **Clip shapes.** These use the original reference paths with `transform="scale(1/407 1/411)"` inside an `objectBoundingBox` clipPath, instead of hand-converted coordinates. They're defined once per section, with IDs `HelmetClipDesktop-{section.id}` / `HelmetClipMobile-{section.id}`.
+- **Desktop/tablet frame.** The desktop frame shape is used from 750px (tablet and desktop); the mobile shape is used below 750px.
+- **Stagger.** Offset columns are marked in Liquid with `helmet-grid__item--offset`: columns 2 and 4, or column 2 when the vertical filter sidebar reduces the grid to 3 columns.
+- **Parallax.** The script sets one variable (`--helmet-parallax-offset`) on `<helmet-grid-parallax>`; only offset items read it, so there's one style write per frame.
+- **Images.** Both images use `alt=""`, because the product title inside the link names the card and repeating it would make screen readers announce the name twice.
+- **Sale badge.** Dawn's "Sale" badge is hidden inside the card (the crossed-out price already shows the sale); the "Sold out" badge is restyled as a small outlined label.
+- **Collection-page-only IDs.** `#ProductGridContainer` and `#product-grid` are only output on collection pages, so a picker-based copy on the homepage can't collide with anything.
+
+**Still to verify in QA:**
+- `paginate` with the picker collection on the homepage
+- Safari rendering of the nested clip-path
+- Notch text sizing and position against the reference
