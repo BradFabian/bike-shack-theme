@@ -46,7 +46,7 @@ The default "Product grid" and the new section can't live on the same page, beca
 
 - [ ] *(Optional, to affect "Full" only)* Theme editor → template dropdown → Collections → Create template → name it `full`, based on "Default collection"
 - [ ] *(Optional)* Products → Collections → Full → Theme template → choose `full` → Save
-- [ ] In the chosen collection template: remove **Product grid**, then click **Add section → Custom Collection**
+- [ ] In the chosen collection template: hide **Product grid** (the editor offers no remove option because the section has no presets), then click **Add section → Custom Collection**
 - [ ] In the section settings, select the dark colour scheme
 
 ### Code Preparation (before any visitor touches the page)
