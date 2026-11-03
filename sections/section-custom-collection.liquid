@@ -12,7 +12,6 @@
 
 {{ 'section-custom-collection.css' | asset_url | stylesheet_tag }}
 {{ 'template-collection.css' | asset_url | stylesheet_tag }}
-{{ 'component-price.css' | asset_url | stylesheet_tag }}
 {%- if section.settings.show_rating -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
 {%- endif -%}
@@ -75,15 +74,16 @@
 
 {%- comment -%}
   Clip shapes for the notched frame, scaled to 0–1 so they fit any card size.
-  Paths come from the reference SVGs (desktop viewBox 407×411, mobile 187×188).
+  Paths come from the reference SVGs (desktop viewBox 407×411, mobile 187×188), with the notch
+  widened to fit the product name and price. Keep them in sync with the frames in card-helmet.liquid.
 {%- endcomment -%}
 <svg class="helmet-clip-defs" width="0" height="0" aria-hidden="true" focusable="false">
   <defs>
     <clipPath id="HelmetClipDesktop-{{ section.id }}" clipPathUnits="objectBoundingBox">
-      <path transform="scale(0.0024570 0.0024331)" d="M8 .5h390.89a7.5 7.5 0 0 1 7.5 7.5v356.983a7.5 7.5 0 0 1-7.5 7.5H263.329a23.502 23.502 0 0 0-18.375 8.849l-16.499 20.695a22.502 22.502 0 0 1-17.593 8.473H8A7.5 7.5 0 0 1 .5 403V8A7.5 7.5 0 0 1 8 .5Z"/>
+      <path transform="scale(0.0024570 0.0024331)" d="M8 .5h390.89a7.5 7.5 0 0 1 7.5 7.5v356.983a7.5 7.5 0 0 1-7.5 7.5H173.329a23.502 23.502 0 0 0-18.375 8.849l-16.499 20.695a22.502 22.502 0 0 1-17.593 8.473H8A7.5 7.5 0 0 1 .5 403V8A7.5 7.5 0 0 1 8 .5Z"/>
     </clipPath>
     <clipPath id="HelmetClipMobile-{{ section.id }}" clipPathUnits="objectBoundingBox">
-      <path transform="scale(0.0053476 0.0053191)" d="M8 .5h170.12a7.5 7.5 0 0 1 7.5 7.5v154.61a7.5 7.5 0 0 1-7.5 7.5H60.681a10.5 10.5 0 0 0-8.21 3.954l-7.86 9.858a9.5 9.5 0 0 1-7.427 3.578H8A7.5 7.5 0 0 1 .5 180V8A7.5 7.5 0 0 1 8 .5Z"/>
+      <path transform="scale(0.0053476 0.0053191)" d="M8 .5h170.12a7.5 7.5 0 0 1 7.5 7.5v154.61a7.5 7.5 0 0 1-7.5 7.5H48.681a10.5 10.5 0 0 0-8.21 3.954l-7.86 9.858a9.5 9.5 0 0 1-7.427 3.578H8A7.5 7.5 0 0 1 .5 180V8A7.5 7.5 0 0 1 8 .5Z"/>
     </clipPath>
   </defs>
 </svg>

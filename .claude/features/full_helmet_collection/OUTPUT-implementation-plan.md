@@ -414,3 +414,9 @@ Build steps 1–10 are implemented. Nothing has been rendered yet: there's no Sh
 - `paginate` with the picker collection on the homepage
 - Safari rendering of the nested clip-path
 - Notch text sizing and position against the reference
+
+## QA Round 1 Adjustments (2026-11-03)
+
+- **Price markup.** The card no longer uses `snippets/price.liquid`, which adds the currency code when `currency_code_enabled` is on. It has its own markup using `money_without_trailing_zeros`, and "Sold out" replaces the price. `component-price.css` is no longer loaded by the section.
+- **Notch width.** The frame path changed in one value: `H263.329` → `H173.329` (desktop), `H60.681` → `H48.681` (mobile). The same value appears in the card's frame SVGs and the section's clip paths, so change both together.
+- **Reveal.** The oval now grows from the top edge down, matching Desktop 4. This replaces "grows in from the bottom" in the plan and `feature.md`. Timing lives in `--helmet-reveal-*` on `.helmet-card`.

@@ -163,7 +163,7 @@ A new standalone "Custom Collection" section with its own helmet-style product c
 - **Stagger + parallax (desktop only, ≥990px):** columns 2 and 4 sit lower than columns 1 and 3, and they drift slightly as the page scrolls. The movement is off when the user prefers reduced motion, and below 990px the grid is even.
 - **Notched frame:** each card has the SVG outline from the reference, with the step cut out at the bottom-left. There are two shapes, desktop (407×411 viewBox) and mobile (187×188 viewBox), switched at 750px.
 - **Hover / keyboard focus:**
-  - The product's 2nd image grows in from the bottom as an oval (`clip-path` ellipse) until it fills the frame, clipped to the notched shape.
+  - The product's 2nd image grows down from the top as an oval (`clip-path` ellipse) until it fills the frame, clipped to the notched shape.
   - The frame outline turns to the accent colour.
   - Both reverse smoothly when the pointer or focus leaves.
   - With no 2nd image, only the outline highlight happens.

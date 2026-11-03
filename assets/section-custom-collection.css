@@ -3,9 +3,9 @@
   Section: sections/section-custom-collection.liquid
   Card:    snippets/card-helmet.liquid
 
-  Frame proportions come from the reference SVGs:
-  - desktop (≥750px): viewBox 407×411, notch starts at x 263 / y 372.5
-  - mobile (<750px):  viewBox 187×188, notch starts at x 60.7 / y 170.1
+  Frame proportions come from the reference SVGs, with the notch widened to fit name + price:
+  - desktop (≥750px): viewBox 407×411, notch starts at x 173 / y 372.5
+  - mobile (<750px):  viewBox 187×188, notch starts at x 48.7 / y 170.1
 */
 
 .helmet-clip-defs {
@@ -81,6 +81,9 @@ helmet-grid-parallax {
 /* Card */
 
 .helmet-card {
+  --helmet-reveal-ease: cubic-bezier(0.62, 0.05, 0.12, 1);
+  --helmet-reveal-in: 1.2s;
+  --helmet-reveal-out: 0.9s;
   display: block;
   color: rgb(var(--color-foreground));
   text-decoration: none;
@@ -110,7 +113,7 @@ helmet-grid-parallax {
   z-index: 2;
   color: rgba(var(--color-foreground), 0.3);
   pointer-events: none;
-  transition: color 0.4s ease;
+  transition: color var(--helmet-reveal-out) var(--helmet-reveal-ease);
 }
 
 .helmet-card__frame svg {
@@ -148,43 +151,70 @@ helmet-grid-parallax {
   width: 80%;
   height: 72%;
   object-fit: contain;
+  transition: transform var(--helmet-reveal-out) var(--helmet-reveal-ease),
+    opacity var(--helmet-reveal-out) var(--helmet-reveal-ease);
 }
 
 .helmet-card__placeholder {
   fill: rgba(var(--color-foreground), 0.3);
 }
 
-/* Lifestyle image: hidden as a zero-size oval at the bottom edge, grows to fill the frame */
+/*
+  Lifestyle image: a wide oval anchored to the top edge. It grows downward with a curved lower
+  edge while the image settles from a slight zoom, and the helmet sinks and fades out beneath it.
+*/
 .helmet-card__reveal {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  -webkit-clip-path: ellipse(0% 0% at 50% 100%);
-  clip-path: ellipse(0% 0% at 50% 100%);
-  transition: clip-path 0.8s cubic-bezier(0.65, 0, 0.35, 1), -webkit-clip-path 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  transform: scale(1.1);
+  transform-origin: 50% 0;
+  -webkit-clip-path: ellipse(110% 0% at 50% 0%);
+  clip-path: ellipse(110% 0% at 50% 0%);
+  transition: clip-path var(--helmet-reveal-out) var(--helmet-reveal-ease),
+    -webkit-clip-path var(--helmet-reveal-out) var(--helmet-reveal-ease),
+    transform var(--helmet-reveal-out) var(--helmet-reveal-ease);
 }
 
 /* Hover only on devices that really hover, so a tap on mobile doesn't leave a stuck state */
 @media (hover: hover) {
   .helmet-card:hover .helmet-card__frame {
     color: var(--helmet-accent);
+    transition-duration: var(--helmet-reveal-in);
   }
 
   .helmet-card:hover .helmet-card__reveal {
-    -webkit-clip-path: ellipse(150% 150% at 50% 100%);
-    clip-path: ellipse(150% 150% at 50% 100%);
+    transform: scale(1);
+    -webkit-clip-path: ellipse(130% 125% at 50% 0%);
+    clip-path: ellipse(130% 125% at 50% 0%);
+    transition-duration: var(--helmet-reveal-in);
+  }
+
+  .helmet-card--has-reveal:hover .helmet-card__image {
+    transform: translateY(4%) scale(0.96);
+    opacity: 0;
+    transition-duration: var(--helmet-reveal-in);
   }
 }
 
 .helmet-card:focus-visible .helmet-card__frame {
   color: var(--helmet-accent);
+  transition-duration: var(--helmet-reveal-in);
 }
 
 .helmet-card:focus-visible .helmet-card__reveal {
-  -webkit-clip-path: ellipse(150% 150% at 50% 100%);
-  clip-path: ellipse(150% 150% at 50% 100%);
+  transform: scale(1);
+  -webkit-clip-path: ellipse(130% 125% at 50% 0%);
+  clip-path: ellipse(130% 125% at 50% 0%);
+  transition-duration: var(--helmet-reveal-in);
+}
+
+.helmet-card--has-reveal:focus-visible .helmet-card__image {
+  transform: translateY(4%) scale(0.96);
+  opacity: 0;
+  transition-duration: var(--helmet-reveal-in);
 }
 
 /* Info notch — row 1 sits inside the notch, the rating row hangs just below the card */
@@ -192,7 +222,7 @@ helmet-grid-parallax {
 .helmet-card__info {
   position: absolute;
   top: 90.5%;
-  left: 34%;
+  left: 27.5%;
   right: 0;
   z-index: 3;
   display: flex;
@@ -205,7 +235,7 @@ helmet-grid-parallax {
 @media screen and (min-width: 750px) {
   .helmet-card__info {
     top: 90.6%;
-    left: 66%;
+    left: 44%;
     font-size: 1.4rem;
   }
 }
@@ -220,7 +250,7 @@ helmet-grid-parallax {
   display: flex;
   align-items: baseline;
   justify-content: flex-end;
-  gap: 0.8rem;
+  gap: 0.6rem;
   max-width: 100%;
   padding-top: 0.4em;
 }
@@ -239,54 +269,31 @@ helmet-grid-parallax {
   text-overflow: ellipsis;
 }
 
-/* Price — scoped overrides of component-price.css */
+/* Price */
 
-.helmet-card .price {
+.helmet-card__price {
+  display: flex;
   flex: 0 0 auto;
-  font-size: inherit;
+  align-items: baseline;
+  gap: 0.5rem;
   letter-spacing: 0.02em;
-  line-height: inherit;
   color: var(--helmet-accent);
   white-space: nowrap;
 }
 
-.helmet-card .price .price-item {
-  margin: 0;
-}
-
-.helmet-card .price--on-sale .price__sale {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.helmet-card .price--on-sale .price-item--regular {
+.helmet-card__price-compare {
   font-size: 0.85em;
   color: rgba(var(--color-foreground), 0.6);
 }
 
-.helmet-card .price .price-item--sale {
-  color: var(--helmet-accent);
-}
-
-.helmet-card .price .price__badge-sale {
-  display: none;
-}
-
-.helmet-card .price .price__badge-sold-out {
-  margin-left: 0.6rem;
+.helmet-card__sold-out {
   padding: 0.1rem 0.6rem;
   border: 0.1rem solid rgba(var(--color-foreground), 0.6);
   border-radius: 0.4rem;
-  background: transparent;
   color: rgb(var(--color-foreground));
   font-size: 0.75em;
   letter-spacing: 0.04em;
   line-height: 1.4;
-}
-
-.helmet-card .unit-price {
-  display: none;
 }
 
 /* Rating */
@@ -314,6 +321,7 @@ helmet-grid-parallax {
 
 @media (prefers-reduced-motion: reduce) {
   .helmet-card__frame,
+  .helmet-card__image,
   .helmet-card__reveal {
     transition: none;
   }

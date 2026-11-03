@@ -62,3 +62,17 @@ The implementation plan and the Round 1 QA checklist are written. There are 10 b
 Changed the `products_per_page` default from 24 to 8, at the user's request. This supersedes the "24 per page" decision in `feature.md`. It's still a client-editable setting (4–24).
 
 **Watch:** a section already saved in the theme editor keeps its stored value, so it won't pick up the new default.
+
+## 2026-11-03 — Custom Collection: QA Round 1 fixes
+
+**Done:** The hover reveal now runs top to bottom, with slower, layered motion. The name and price were reworked to fit. Round 2 of QA is ready.
+
+**Decisions:**
+- **Card price skips the `price` snippet.** The currency code is a global setting that's on, and turning it off would change the whole site. Alternative rejected: editing the shared snippet.
+- **Whole prices drop ".00"**, to save space in the notch.
+- **The notch is wider than the reference** (about 57% of the card on desktop instead of 35%), because product names are longer than the reference's. Accepted departure from the reference shape, pending the user's review in Round 2.
+
+**Watch:**
+- With no currency code on cards, a store selling in several currencies shows only the symbol there (e.g. "$" for both USD and CAD).
+- Very long names still truncate, especially on mobile and at 990px.
+
