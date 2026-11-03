@@ -76,3 +76,16 @@ Changed the `products_per_page` default from 24 to 8, at the user's request. Thi
 - With no currency code on cards, a store selling in several currencies shows only the symbol there (e.g. "$" for both USD and CAD).
 - Very long names still truncate, especially on mobile and at 990px.
 
+## 2026-11-03 — Custom Collection: complete
+
+**Done:** QA Round 2 passed, confirmed by the user in chat. The feature was merged to `main` through PR #3.
+
+**Built:** `sections/section-custom-collection.liquid`, `snippets/card-helmet.liquid`, `assets/section-custom-collection.css`, `assets/custom-collection.js`, plus `sections.custom_collection.*` locale keys.
+
+**Accepted trade-offs:** see the Round 2 summary in the feature's `OUTPUT-qa-debugging.md`. The wider notch is now confirmed, not pending.
+
+**Still open:**
+- Placing the section is a launch task: hide "Product grid" on the chosen collection template (it has no presets, so the editor can't remove it), add Custom Collection, and select the dark scheme.
+- Which review app the store uses wasn't recorded. Stars depend on the `reviews.rating` metafields.
+- The Round 2 boxes weren't ticked individually, so there's no per-item record of the Safari and iOS checks.
+

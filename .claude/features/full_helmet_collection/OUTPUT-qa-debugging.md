@@ -10,11 +10,18 @@ Implementation plan: `.claude/features/full_helmet_collection/OUTPUT-implementat
 3. Repeat until everything passes.
 4. Previous rounds are kept as a log below the current round.
 
-**Test setup:** a dark colour scheme is selected in the section. Test on a collection page (with the default "Product grid" removed) AND on the homepage with a collection chosen in the picker.
+**Test setup:** a dark colour scheme is selected in the section. Test on a collection page (with the default "Product grid" hidden) AND on the homepage with a collection chosen in the picker.
 
 ## Current Round (Round 2)
 
-Status: Testing
+Status: Passed (2026-11-03). The user confirmed in chat: "round 2 QA is perfect". The boxes below were not ticked individually, so they're left as they were.
+
+**Accepted trade-offs:**
+- The notch is wider than the reference (about 57% of the card on desktop instead of 35%, about 74% on mobile instead of 68%), to fit product names.
+- Very long names still truncate with "…", most often on mobile and on small desktop/tablet widths.
+- Cards show no currency code and drop ".00" on whole prices. The rest of the site still shows the code.
+- Sold-out cards show the label in place of the price.
+- The section can't share a page with the default "Product grid", or with a second copy of itself on a collection page. This is a documented rule that the code can't enforce.
 
 ### Core behavior
 
