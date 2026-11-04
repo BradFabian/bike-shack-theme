@@ -64,7 +64,8 @@ Status: Testing
 - [ ] No video, images, heading, or tooltips: a hint in the theme editor, nothing on the live site
 - [ ] Fewer than 3 mobile images: only the ones set are shown
 - [ ] No tooltip blocks: the video still scrubs, and no list appears on mobile
-- [ ] A tooltip with its end time before its start, or past the video's end: never shows on desktop, no errors, and still appears in the mobile list
+- [ ] A tooltip with its end time before its start, or its start time past the video's end: never shows on desktop, no errors, and still appears in the mobile list
+- [ ] A tooltip with its end time past the video's end: shows from its start time through to the last frame
 - [ ] Very long tooltip text doesn't break the layout
 - [ ] DevTools throttled to Slow 4G: the fallback image shows until the video is ready, and there's no blank pinned area
 - [ ] Two Interactive Video sections on one page both work independently

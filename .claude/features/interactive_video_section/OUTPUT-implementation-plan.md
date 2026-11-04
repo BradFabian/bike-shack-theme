@@ -340,5 +340,50 @@ No templates, Dawn core JS/CSS, or existing snippets are modified.
 ## Open Questions
 
 - Tooltip copy and count from the client. Not a blocker; placeholder text works during the build.
-- Whether the client has mobile and fallback images, or AI should export stills from the video.
+- Mobile images: use the three `mobile-helmet-*.jpeg` files in `reference/` for now. Decide after QA whether to export 1080×1080 replacements from the video, because these are 500×500 and `mobile-helmet-side.jpeg` shows faint video player controls.
+- Fallback image: not chosen yet.
+- Mobile tooltips: the user wants to rethink the list below the images (2026-11-04), pending their deeper QA. This could change Step 6's list and the Step 7 fallback layout, which reuses it.
 - Whether the `number` setting accepts decimals (answered in Step 2).
+
+## Implementation Notes
+
+### Step 1: CDN check (2026-11-04) — passed
+
+Video URL: `https://cdn.shopify.com/videos/c/o/v/5ed94fa7f455407fa1ed82dd4fa6e43f.mp4`
+
+- The SHA-256 matches the local file, so Shopify serves the upload byte-for-byte unchanged.
+- 1920×1080, 30fps, H.264 High, `yuv420p`, 6.57s, 12,542,679 bytes, no audio.
+- 197 frames, 197 keyframes. `moov` comes before `mdat` (faststart).
+- `Content-Type: video/mp4`, `Accept-Ranges: bytes`, and a range request returns 206.
+- `Access-Control-Allow-Origin: *`, so the blob URL fallback in Step 4 can fetch it.
+- Cached for a year (`max-age=31557600`), so a replacement video should be uploaded as a new file with a new link rather than expected to refresh at this URL.
+- Not yet tested: scrubbing in real browsers. That's the Step 4 go/no-go gate.
+
+### Step 2: Skeleton, settings, translations (2026-11-04) — built, awaiting editor check
+
+- Created the section, CSS, and JS stub, and added the translation keys. The schema and locale JSON parse, and all 37 `t:` keys resolve.
+- Times use the `number` type. The preset contains decimals (1.8, 3.2) as the test. If Shopify rejects them, switch both times to `text` and use `parseFloat` in JS.
+- The section appears and adds with 3 tooltips on the homepage, with readable labels (user's screenshot). The decimal check and the other templates are still open; the preset's decimals caused no error when adding the section.
+
+### Step 3: Pinned layout and video box (2026-11-04) — built, awaiting browser check
+
+- Added the headline, scroll area, sticky stage, video box, poster, and edge fade.
+- The scroll-length class is only added when there's a video URL, so a blank URL can't leave a tall empty area.
+- The stage is hidden below 990px now rather than in Step 6, and the poster is lazy-loaded, so it isn't fetched there. The section is blank below 990px until Step 6.
+- The edge fade also covers the poster (the plan only had the video), because the poster's background isn't an exact match either.
+
+### Step 4: Scroll scrubbing (2026-11-04) — built, go/no-go test pending
+
+- Added lazy loading, the frame loop, smoothing (0.12 per frame), and safe seeking.
+- The `play().then(pause)` first-frame workaround is deliberately left out until Safari shows it's needed.
+- A broken video link keeps the poster pinned until Step 7 adds the fallback.
+- Go/no-go results from the user: Safari "works flawlessly"; Chrome smooth both ways, so `SMOOTHING` stays at 0.12. User confirmed desktop looks great in Chrome, Safari, and Firefox. **Gate passed.**
+
+### Steps 5 and 6: Tooltips, images, and text list (2026-11-04) — built, awaiting browser check
+
+- Built together at the user's prompting; both are independent of each other.
+- Changed from the plan: a tooltip whose end time is past the video's end now shows through to the last frame, rather than never showing, because that's what someone entering it would expect. It still never shows if its start time is past the end, or its end is before its start. The QA item is updated to match.
+- Added: a block with no title and no text is skipped in both the tooltips and the list, so it can't show a line with nothing attached.
+- Mobile images use `image_tag`'s default alt text from Shopify; confirm in QA.
+- The text clamp assumes about 16rem of tooltip height. Much longer text could run past the box near the top or bottom.
+- Preset target positions are placeholders until the real tooltips are positioned.

@@ -1,0 +1,183 @@
+/*
+  Interactive Video — styles for sections/section-interactive-video.liquid.
+
+  The pinned stage only exists at 990px and up. Below that the section shows images
+  and a text list instead, so the stage stays hidden and its lazy poster isn't fetched.
+*/
+.interactive-video {
+  --video-ratio: 16 / 9;
+  display: block;
+}
+
+.interactive-video__stage {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  /* Scroll distance is the area's height minus the stage's 100vh. */
+  .interactive-video--short {
+    height: 200vh;
+  }
+
+  .interactive-video--medium {
+    height: 300vh;
+  }
+
+  .interactive-video--long {
+    height: 400vh;
+  }
+
+  .interactive-video__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* Fits the whole video on screen and gives tooltips a box that keeps the video's shape. */
+.interactive-video__box {
+  position: relative;
+  width: min(100%, calc(100vh * var(--video-ratio)));
+  aspect-ratio: var(--video-ratio);
+}
+
+/* The soft edges stop a box showing where the video's background meets the section's. */
+.interactive-video__video,
+.interactive-video__poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent),
+    linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent),
+    linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.interactive-video__poster {
+  transition: opacity 0.4s ease;
+}
+
+.interactive-video.is-ready .interactive-video__poster {
+  opacity: 0;
+}
+
+/* Tooltips fill the box, so --target-x and --target-y stay on the same part of the video. */
+.interactive-video__tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.interactive-video__tooltip-content {
+  position: absolute;
+  /* Keeps the text inside the box when the target is near the top or bottom. */
+  top: clamp(8rem, var(--target-y), calc(100% - 8rem));
+  box-sizing: border-box;
+  width: 28%;
+  opacity: 0;
+  transform: translateY(calc(-50% + 1rem));
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.interactive-video__tooltip--left .interactive-video__tooltip-content {
+  left: 0;
+  padding: 0 1.6rem 0 3rem;
+}
+
+.interactive-video__tooltip--right .interactive-video__tooltip-content {
+  right: 0;
+  padding: 0 3rem 0 1.6rem;
+}
+
+/* Runs from the text to the target. A target behind the text gets no line. */
+.interactive-video__tooltip-line {
+  position: absolute;
+  top: var(--target-y);
+  height: 1px;
+  background: rgba(var(--color-foreground), 0.5);
+  transform: scaleX(0);
+  transition: transform 0.5s ease;
+}
+
+.interactive-video__tooltip--left .interactive-video__tooltip-line {
+  left: 28%;
+  width: max(0%, calc(var(--target-x) - 28%));
+  transform-origin: left center;
+}
+
+.interactive-video__tooltip--right .interactive-video__tooltip-line {
+  right: 28%;
+  width: max(0%, calc(72% - var(--target-x)));
+  transform-origin: right center;
+}
+
+.interactive-video.is-ready .interactive-video__tooltip.is-visible .interactive-video__tooltip-content {
+  opacity: 1;
+  transform: translateY(-50%);
+}
+
+.interactive-video.is-ready .interactive-video__tooltip.is-visible .interactive-video__tooltip-line {
+  transform: scaleX(1);
+}
+
+/* Shared by the tooltips and the list. */
+.interactive-video__title {
+  margin: 0 0 0.6rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgb(var(--color-foreground));
+}
+
+.interactive-video__text {
+  margin: 0;
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.interactive-video__images {
+  display: grid;
+  gap: 2rem;
+}
+
+.interactive-video__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.interactive-video__list {
+  display: grid;
+  gap: 2.4rem;
+  margin-top: 3rem;
+}
+
+@media screen and (min-width: 990px) {
+  .interactive-video__images {
+    display: none;
+  }
+
+  /* The on-video tooltips are aria-hidden, so screen readers read this copy instead. */
+  .interactive-video__list {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+  }
+}

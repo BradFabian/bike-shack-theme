@@ -118,3 +118,13 @@ The implementation plan and the Round 1 QA checklist are written. There are 9 bu
 **Gates:** Step 1 confirms the CDN serves the file unchanged. Step 4 is a go/no-go on smooth scrubbing in Chrome, Safari, and Firefox before tooltips are built.
 
 **Open:** tooltip copy from the client, and whether the `number` setting accepts decimals (tested in Step 2).
+
+## 2026-11-04 — Building: Interactive Video (Steps 1–4)
+
+Steps 2–4 are built and uncommitted. Details are in the plan's Implementation Notes.
+
+**Confirmed:** Shopify's CDN serves the video byte-for-byte unchanged, with range requests and open CORS. It's cached for a year, so a replacement video should be a new file with a new link.
+
+**Waiting on:** the Step 4 go/no-go on scrubbing in Chrome, Safari, and Firefox. Step 5 doesn't start until that passes. The pinning and decimal time checks are also still open.
+
+**Deferred until after QA:** the mobile images are 500×500, and `mobile-helmet-side.jpeg` shows faint video player controls. Decide then whether to export replacements from the video.

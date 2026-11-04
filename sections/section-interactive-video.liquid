@@ -1,0 +1,355 @@
+{% comment %}
+  Interactive Video — pins a silent video on desktop and scrubs it with scroll, with timed tooltips.
+  Spec: .claude/features/interactive_video_section/feature.md
+{% endcomment %}
+
+{{ 'section-interactive-video.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'interactive-video.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign video_url = section.settings.video_url | strip
+  assign fallback = section.settings.fallback_image | default: section.settings.mobile_image_1
+-%}
+
+<div class="interactive-video-section color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
+  {%- unless section.settings.heading == blank -%}
+    <div class="page-width">
+      <div class="title-wrapper title-wrapper--no-top-margin">
+        <h2 class="title inline-richtext {{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
+      </div>
+    </div>
+  {%- endunless -%}
+
+  <interactive-video
+    class="interactive-video{% if video_url != blank %} interactive-video--{{ section.settings.scroll_length }}{% endif %}"
+    data-video-url="{{ video_url | escape }}"
+  >
+    {%- if video_url != blank -%}
+      <div class="interactive-video__stage">
+        <div class="interactive-video__box">
+          <video
+            class="interactive-video__video"
+            muted
+            playsinline
+            preload="none"
+            disablepictureinpicture
+            aria-hidden="true"
+            tabindex="-1"
+          ></video>
+          {%- if fallback != blank -%}
+            {{
+              fallback
+              | image_url: width: 1920
+              | image_tag:
+                class: 'interactive-video__poster',
+                alt: '',
+                widths: '750, 1100, 1500, 1920',
+                sizes: '100vw',
+                loading: 'lazy'
+            }}
+          {%- endif -%}
+
+          {%- for block in section.blocks -%}
+            {%- if block.settings.title != blank or block.settings.text != blank -%}
+              <div
+                class="interactive-video__tooltip interactive-video__tooltip--{{ block.settings.side }}"
+                data-start="{{ block.settings.start_time }}"
+                data-end="{{ block.settings.end_time }}"
+                style="--target-x: {{ block.settings.target_x }}%; --target-y: {{ block.settings.target_y }}%;"
+                aria-hidden="true"
+                {{ block.shopify_attributes }}
+              >
+                <span class="interactive-video__tooltip-line"></span>
+                <div class="interactive-video__tooltip-content">
+                  {%- if block.settings.title != blank -%}
+                    <p class="interactive-video__title">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.text != blank -%}
+                    <p class="interactive-video__text">{{ block.settings.text | escape }}</p>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="interactive-video__images">
+      {%- for i in (1..3) -%}
+        {%- assign image_key = 'mobile_image_' | append: i -%}
+        {%- assign mobile_image = section.settings[image_key] -%}
+        {%- if mobile_image != blank -%}
+          {{
+            mobile_image
+            | image_url: width: 1500
+            | image_tag:
+              class: 'interactive-video__image',
+              widths: '375, 550, 750, 1100, 1500',
+              sizes: '100vw',
+              loading: 'lazy'
+          }}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="page-width">
+        <ul class="interactive-video__list list-unstyled" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.settings.title != blank or block.settings.text != blank -%}
+              <li class="interactive-video__list-item">
+                {%- if block.settings.title != blank -%}
+                  <p class="interactive-video__title">{{ block.settings.title | escape }}</p>
+                {%- endif -%}
+                {%- if block.settings.text != blank -%}
+                  <p class="interactive-video__text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </interactive-video>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.interactive_video.name",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "t:sections.interactive_video.settings.video_url.label",
+      "info": "t:sections.interactive_video.settings.video_url.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "t:sections.interactive_video.settings.fallback_image.label",
+      "info": "t:sections.interactive_video.settings.fallback_image.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_1",
+      "label": "t:sections.interactive_video.settings.mobile_image_1.label",
+      "info": "t:sections.interactive_video.settings.mobile_image_1.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_2",
+      "label": "t:sections.interactive_video.settings.mobile_image_2.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_3",
+      "label": "t:sections.interactive_video.settings.mobile_image_3.label"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:sections.interactive_video.settings.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "select",
+      "id": "scroll_length",
+      "options": [
+        {
+          "value": "short",
+          "label": "t:sections.interactive_video.settings.scroll_length.options__1.label"
+        },
+        {
+          "value": "medium",
+          "label": "t:sections.interactive_video.settings.scroll_length.options__2.label"
+        },
+        {
+          "value": "long",
+          "label": "t:sections.interactive_video.settings.scroll_length.options__3.label"
+        }
+      ],
+      "default": "medium",
+      "label": "t:sections.interactive_video.settings.scroll_length.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tooltip",
+      "name": "t:sections.interactive_video.blocks.tooltip.name",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "default": "t:sections.interactive_video.blocks.tooltip.settings.title.default",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.title.label"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "default": "t:sections.interactive_video.blocks.tooltip.settings.text.default",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.text.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.text.info"
+        },
+        {
+          "type": "number",
+          "id": "start_time",
+          "default": 2,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.start_time.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.start_time.info"
+        },
+        {
+          "type": "number",
+          "id": "end_time",
+          "default": 3,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.end_time.label"
+        },
+        {
+          "type": "select",
+          "id": "side",
+          "options": [
+            {
+              "value": "left",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.side.options__1.label"
+            },
+            {
+              "value": "right",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.side.options__2.label"
+            }
+          ],
+          "default": "left",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.side.label"
+        },
+        {
+          "type": "range",
+          "id": "target_x",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.target_x.label"
+        },
+        {
+          "type": "range",
+          "id": "target_y",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.target_y.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.interactive_video.presets.name",
+      "blocks": [
+        {
+          "type": "tooltip",
+          "settings": {
+            "start_time": 1.8,
+            "end_time": 3.2,
+            "side": "left",
+            "target_x": 42,
+            "target_y": 35
+          }
+        },
+        {
+          "type": "tooltip",
+          "settings": {
+            "start_time": 3.4,
+            "end_time": 4.9,
+            "side": "right",
+            "target_x": 58,
+            "target_y": 50
+          }
+        },
+        {
+          "type": "tooltip",
+          "settings": {
+            "start_time": 5,
+            "end_time": 6.4,
+            "side": "left",
+            "target_x": 42,
+            "target_y": 70
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

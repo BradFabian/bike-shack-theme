@@ -692,6 +692,85 @@
         "name": "Custom Collection"
       }
     },
+    "interactive_video": {
+      "name": "Interactive Video",
+      "settings": {
+        "video_url": {
+          "label": "Video URL",
+          "info": "Paste the link from Content > Files. For smooth scrolling, the video must be encoded with every frame as a keyframe, and its background should match the color scheme."
+        },
+        "fallback_image": {
+          "label": "Fallback image",
+          "info": "Shows on desktop while the video loads, or if it can't play. Uses Mobile image 1 if empty."
+        },
+        "mobile_image_1": {
+          "label": "Mobile image 1",
+          "info": "Mobile images replace the video on phones and tablets."
+        },
+        "mobile_image_2": {
+          "label": "Mobile image 2"
+        },
+        "mobile_image_3": {
+          "label": "Mobile image 3"
+        },
+        "heading": {
+          "label": "Heading"
+        },
+        "scroll_length": {
+          "label": "Scroll length",
+          "options__1": {
+            "label": "Short"
+          },
+          "options__2": {
+            "label": "Medium"
+          },
+          "options__3": {
+            "label": "Long"
+          }
+        }
+      },
+      "blocks": {
+        "tooltip": {
+          "name": "Tooltip",
+          "settings": {
+            "title": {
+              "label": "Title",
+              "default": "Tooltip title"
+            },
+            "text": {
+              "label": "Text",
+              "info": "About 120 characters fits comfortably.",
+              "default": "Describe this feature of the product in a short sentence."
+            },
+            "start_time": {
+              "label": "Start time (seconds)",
+              "info": "When the tooltip appears in the video. Decimals such as 2.5 are allowed."
+            },
+            "end_time": {
+              "label": "End time (seconds)"
+            },
+            "side": {
+              "label": "Text side",
+              "options__1": {
+                "label": "Left"
+              },
+              "options__2": {
+                "label": "Right"
+              }
+            },
+            "target_x": {
+              "label": "Line target, horizontal"
+            },
+            "target_y": {
+              "label": "Line target, vertical"
+            }
+          }
+        }
+      },
+      "presets": {
+        "name": "Interactive Video"
+      }
+    },
     "custom-liquid": {
       "name": "Custom Liquid",
       "settings": {
