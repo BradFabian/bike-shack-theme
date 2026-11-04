@@ -89,3 +89,32 @@ Changed the `products_per_page` default from 24 to 8, at the user's request. Thi
 - Which review app the store uses wasn't recorded. Stars depend on the `reviews.rating` metafields.
 - The Round 2 boxes weren't ticked individually, so there's no per-item record of the Safari and iOS checks.
 
+
+## 2026-11-03 — Scoped: Interactive Video
+
+**Feature:** `.claude/features/interactive_video_section/`, on branch `feature/interactive-video-section`. A new section with a silent video scrubbed by scroll, modelled on Apple's AirPods 4 page, with timed tooltips set as blocks.
+
+**Key decisions:**
+- A real `<video>` over an image sequence (the client can swap one file) and over autoplay (scroll-driven playback is the core request).
+- Video only at 990px and up. Below that, three images plus the tooltip text as a list, and the video file is never requested.
+- Broken video URL or reduced motion: no pinning, just a fallback image and the tooltip text.
+
+**Risk:** smooth scrubbing depends on special encoding, and it isn't confirmed that a pasted Shopify CDN link delivers that exact file. Test this first.
+
+**Open:** the final video file isn't in the repo yet, and its background colour is unconfirmed (it must match a colour scheme).
+
+## 2026-11-03 — Planned: Interactive Video
+
+The implementation plan and the Round 1 QA checklist are written. There are 9 build steps.
+
+**Video check:** the client file (6.57s, 1920×1080, 12.5 MB) already has a keyframe on all 197 frames, no audio, and is web optimised, so no re-encoding is needed. Its background is about `#1f1f21`, matching schemes 1 and 2, so that question is closed.
+
+**Design choices worth remembering:**
+- Tooltip positions are percentages of a box that keeps the video's shape, not of the screen, so they stay on the product.
+- The tooltip list is the single accessible copy; the on-video tooltips are `aria-hidden`.
+- A new seek only starts when the last one has finished, to protect Safari.
+- A soft edge fade hides small colour differences between the video and the background.
+
+**Gates:** Step 1 confirms the CDN serves the file unchanged. Step 4 is a go/no-go on smooth scrubbing in Chrome, Safari, and Firefox before tooltips are built.
+
+**Open:** tooltip copy from the client, and whether the `number` setting accepts decimals (tested in Step 2).
