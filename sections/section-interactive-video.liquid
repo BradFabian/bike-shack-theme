@@ -67,11 +67,15 @@
 
           {%- for block in section.blocks -%}
             {%- if block.settings.title != blank or block.settings.text != blank -%}
+              {%- assign line_direction = 'right' -%}
+              {%- if block.settings.line_end < block.settings.position_x -%}
+                {%- assign line_direction = 'left' -%}
+              {%- endif -%}
               <div
-                class="interactive-video__tooltip interactive-video__tooltip--{{ block.settings.side }}"
+                class="interactive-video__tooltip interactive-video__tooltip--line-{{ line_direction }}"
                 data-start="{{ block.settings.start_time }}"
                 data-end="{{ block.settings.end_time }}"
-                style="--target-x: {{ block.settings.target_x }}%; --target-y: {{ block.settings.target_y }}%;"
+                style="--position-x: {{ block.settings.position_x }}%; --position-y: {{ block.settings.position_y }}%; --line-end: {{ block.settings.line_end }}%;"
                 aria-hidden="true"
                 {{ block.shopify_attributes }}
               >
@@ -276,40 +280,36 @@
           "label": "t:sections.interactive_video.blocks.tooltip.settings.end_time.label"
         },
         {
-          "type": "select",
-          "id": "side",
-          "options": [
-            {
-              "value": "left",
-              "label": "t:sections.interactive_video.blocks.tooltip.settings.side.options__1.label"
-            },
-            {
-              "value": "right",
-              "label": "t:sections.interactive_video.blocks.tooltip.settings.side.options__2.label"
-            }
-          ],
-          "default": "left",
-          "label": "t:sections.interactive_video.blocks.tooltip.settings.side.label"
+          "type": "range",
+          "id": "position_x",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 14,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.position_x.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.position_x.info"
         },
         {
           "type": "range",
-          "id": "target_x",
+          "id": "position_y",
           "min": 0,
           "max": 100,
           "step": 1,
           "unit": "%",
           "default": 50,
-          "label": "t:sections.interactive_video.blocks.tooltip.settings.target_x.label"
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.position_y.label"
         },
         {
           "type": "range",
-          "id": "target_y",
+          "id": "line_end",
           "min": 0,
           "max": 100,
           "step": 1,
           "unit": "%",
           "default": 50,
-          "label": "t:sections.interactive_video.blocks.tooltip.settings.target_y.label"
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.line_end.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.line_end.info"
         }
       ]
     }
@@ -323,9 +323,9 @@
           "settings": {
             "start_time": 1.8,
             "end_time": 3.2,
-            "side": "left",
-            "target_x": 42,
-            "target_y": 35
+            "position_x": 14,
+            "position_y": 35,
+            "line_end": 42
           }
         },
         {
@@ -333,9 +333,9 @@
           "settings": {
             "start_time": 3.4,
             "end_time": 4.9,
-            "side": "right",
-            "target_x": 58,
-            "target_y": 50
+            "position_x": 86,
+            "position_y": 50,
+            "line_end": 58
           }
         },
         {
@@ -343,9 +343,9 @@
           "settings": {
             "start_time": 5,
             "end_time": 6.4,
-            "side": "left",
-            "target_x": 42,
-            "target_y": 70
+            "position_x": 14,
+            "position_y": 70,
+            "line_end": 42
           }
         }
       ]

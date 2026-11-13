@@ -71,66 +71,53 @@
   opacity: 0;
 }
 
-/* Tooltips fill the box, so --target-x and --target-y stay on the same part of the video. */
+/*
+  Tooltips fill the box, so their percentages stay on the same part of the video.
+  --position-x and --position-y are the centre of the text. The clamps keep the 28% wide
+  text inside the box when it's placed near an edge.
+*/
 .interactive-video__tooltip {
+  --text-centre: clamp(14%, var(--position-x), 86%);
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.interactive-video.is-ready .interactive-video__tooltip.is-visible {
+  opacity: 1;
 }
 
 .interactive-video__tooltip-content {
   position: absolute;
-  /* Keeps the text inside the box when the target is near the top or bottom. */
-  top: clamp(8rem, var(--target-y), calc(100% - 8rem));
+  top: clamp(8rem, var(--position-y), calc(100% - 8rem));
+  left: calc(var(--text-centre) - 14%);
   box-sizing: border-box;
   width: 28%;
-  opacity: 0;
-  transform: translateY(calc(-50% + 1rem));
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.interactive-video__tooltip--left .interactive-video__tooltip-content {
-  left: 0;
-  padding: 0 1.6rem 0 3rem;
-}
-
-.interactive-video__tooltip--right .interactive-video__tooltip-content {
-  right: 0;
-  padding: 0 3rem 0 1.6rem;
-}
-
-/* Runs from the text to the target. A target behind the text gets no line. */
-.interactive-video__tooltip-line {
-  position: absolute;
-  top: var(--target-y);
-  height: 1px;
-  background: rgba(var(--color-foreground), 0.5);
-  transform: scaleX(0);
-  transition: transform 0.5s ease;
-}
-
-.interactive-video__tooltip--left .interactive-video__tooltip-line {
-  left: 28%;
-  width: max(0%, calc(var(--target-x) - 28%));
-  transform-origin: left center;
-}
-
-.interactive-video__tooltip--right .interactive-video__tooltip-line {
-  right: 28%;
-  width: max(0%, calc(72% - var(--target-x)));
-  transform-origin: right center;
-}
-
-.interactive-video.is-ready .interactive-video__tooltip.is-visible .interactive-video__tooltip-content {
-  opacity: 1;
+  padding: 0 1.6rem;
   transform: translateY(-50%);
 }
 
-.interactive-video.is-ready .interactive-video__tooltip.is-visible .interactive-video__tooltip-line {
-  transform: scaleX(1);
+/* Runs from the edge of the text to --line-end. A line end behind the text gets no line. */
+.interactive-video__tooltip-line {
+  position: absolute;
+  top: clamp(8rem, var(--position-y), calc(100% - 8rem));
+  height: 1px;
+  background: rgba(var(--color-foreground), 0.5);
+}
+
+.interactive-video__tooltip--line-right .interactive-video__tooltip-line {
+  left: calc(var(--text-centre) + 14%);
+  width: max(0%, calc(var(--line-end) - var(--text-centre) - 14%));
+}
+
+.interactive-video__tooltip--line-left .interactive-video__tooltip-line {
+  left: var(--line-end);
+  width: max(0%, calc(var(--text-centre) - 14% - var(--line-end)));
 }
 
 /* Shared by the tooltips and the list. */

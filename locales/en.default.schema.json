@@ -749,20 +749,16 @@
             "end_time": {
               "label": "End time (seconds)"
             },
-            "side": {
-              "label": "Text side",
-              "options__1": {
-                "label": "Left"
-              },
-              "options__2": {
-                "label": "Right"
-              }
+            "position_x": {
+              "label": "Horizontal position (X)",
+              "info": "Where the tooltip's text sits on the video. 0% is the left edge and 100% is the right edge."
             },
-            "target_x": {
-              "label": "Line target, horizontal"
+            "position_y": {
+              "label": "Vertical position (Y)"
             },
-            "target_y": {
-              "label": "Line target, vertical"
+            "line_end": {
+              "label": "Line end, horizontal",
+              "info": "Where the line stops on the video. The line runs straight across from the text."
             }
           }
         }

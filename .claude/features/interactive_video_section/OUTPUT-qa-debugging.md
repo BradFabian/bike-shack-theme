@@ -50,8 +50,9 @@ Status: Testing
 - [ ] Each tooltip appears at its start time and disappears at its end time
 - [ ] Tooltips also appear and disappear correctly when scrolling up
 - [ ] Each tooltip shows its title, text, and a thin line
-- [ ] The Side setting moves the text to the left or right
-- [ ] The horizontal and vertical sliders move the point the line touches
+- [ ] Tooltips fade in and fade out, including the line, scrolling both down and up
+- [ ] The X and Y sliders move the tooltip's text anywhere on the video, and the text stays inside the video at 0% and 100%
+- [ ] The Line end slider sets where the line stops, on either side of the text, and a line end behind the text shows no line
 - [ ] A tooltip's line stays on the same part of the helmet at 1100×700 and 1920×1080
 - [ ] Overlapping times show both tooltips (and they're readable if placed apart)
 - [ ] A tooltip's text fits and looks right at 990px wide

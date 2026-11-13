@@ -387,3 +387,10 @@ Video URL: `https://cdn.shopify.com/videos/c/o/v/5ed94fa7f455407fa1ed82dd4fa6e43
 - Mobile images use `image_tag`'s default alt text from Shopify; confirm in QA.
 - The text clamp assumes about 16rem of tooltip height. Much longer text could run past the box near the top or bottom.
 - Preset target positions are placeholders until the real tooltips are positioned.
+
+### Tooltip positioning and fade (2026-11-04) — user request, replaces the Step 5 design above
+
+- `side`, `target_x`, and `target_y` are replaced by `position_x`, `position_y` (the centre of the text), and `line_end`. The text can now sit anywhere on the video instead of being locked to the left or right edge.
+- The line stays horizontal, at the text's height, and its direction comes from whether `line_end` is left or right of `position_x`. Alternative considered: a separate line target X and Y with an angled line, which would add a fourth slider and more drawing code. Not built unless QA asks for it.
+- The whole tooltip now fades over 0.6s, replacing the text's slide and the line's draw-in.
+- The fade is time-based, so a fast scroll past a tooltip still shows a brief partial fade.
