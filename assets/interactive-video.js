@@ -6,6 +6,13 @@
   across the pinned area to the video's time. The video is never played, only seeked.
   Desktop only (≥990px) and disabled when the user prefers reduced motion, so the video
   isn't requested on phones and tablets.
+
+  If the video fails to load, the component adds --fallback and the CSS swaps the pinned
+  stage for the fallback image and tooltip list.
+
+  In the theme editor, selecting a tooltip block holds the video at that tooltip's start
+  time and keeps the tooltip visible, so it can be positioned. Scrolling resumes control
+  when the block is deselected.
 */
 if (!customElements.get('interactive-video')) {
   customElements.define(
@@ -29,19 +36,31 @@ if (!customElements.get('interactive-video')) {
         this.isNear = false;
         this.isVisible = false;
         this.hasRequestedVideo = false;
+        this.hasFailed = false;
         this.duration = 0;
         this.displayedTime = 0;
         this.lastSeekTime = null;
         this.frameId = null;
+        this.selectedTooltip = null;
+        this.heldTime = null; // set while a tooltip block is selected in the theme editor
 
         this.wake = this.wake.bind(this);
         this.tick = this.tick.bind(this);
         this.onMediaChange = this.onMediaChange.bind(this);
         this.onLoadedMetadata = this.onLoadedMetadata.bind(this);
         this.onLoadedData = this.onLoadedData.bind(this);
+        this.onError = this.onError.bind(this);
+        this.onBlockSelect = this.onBlockSelect.bind(this);
+        this.onBlockDeselect = this.onBlockDeselect.bind(this);
 
         this.video.addEventListener('loadedmetadata', this.onLoadedMetadata);
         this.video.addEventListener('loadeddata', this.onLoadedData);
+        this.video.addEventListener('error', this.onError);
+
+        if (window.Shopify?.designMode) {
+          this.addEventListener('shopify:block:select', this.onBlockSelect);
+          this.addEventListener('shopify:block:deselect', this.onBlockDeselect);
+        }
 
         this.mediaQuery = window.matchMedia('(min-width: 990px) and (prefers-reduced-motion: no-preference)');
         this.mediaQuery.addEventListener('change', this.onMediaChange);
@@ -75,15 +94,20 @@ if (!customElements.get('interactive-video')) {
         this.removeScrollListeners();
         this.stopLoop();
 
+        this.removeEventListener('shopify:block:select', this.onBlockSelect);
+        this.removeEventListener('shopify:block:deselect', this.onBlockDeselect);
+
+        // Listeners come off before the src is cleared, so clearing it can't trigger the fallback.
         this.video.removeEventListener('loadedmetadata', this.onLoadedMetadata);
         this.video.removeEventListener('loadeddata', this.onLoadedData);
+        this.video.removeEventListener('error', this.onError);
         this.video.removeAttribute('src');
         this.video.load();
         this.classList.remove('is-ready');
       }
 
       onMediaChange() {
-        if (this.mediaQuery.matches) {
+        if (this.mediaQuery.matches && !this.hasFailed) {
           window.addEventListener('scroll', this.wake, { passive: true });
           window.addEventListener('resize', this.wake);
           this.requestVideo();
@@ -124,7 +148,37 @@ if (!customElements.get('interactive-video')) {
         this.classList.add('is-ready');
       }
 
+      // Broken or deleted link, or the network dropped: switch to the fallback layout for good.
+      onError() {
+        this.hasFailed = true;
+        this.classList.add('interactive-video--fallback');
+        this.removeScrollListeners();
+        this.stopLoop();
+      }
+
+      onBlockSelect(event) {
+        const tooltip = this.tooltips.find((item) => item.element === event.target);
+        if (!tooltip) return;
+
+        this.selectedTooltip?.element.classList.remove('is-selected');
+        tooltip.element.classList.add('is-selected');
+        this.selectedTooltip = tooltip;
+        this.heldTime = Number.isFinite(tooltip.start) ? tooltip.start : null;
+        this.wake();
+      }
+
+      onBlockDeselect(event) {
+        if (!this.selectedTooltip || this.selectedTooltip.element !== event.target) return;
+
+        this.selectedTooltip.element.classList.remove('is-selected');
+        this.selectedTooltip = null;
+        this.heldTime = null;
+        this.wake();
+      }
+
       getTargetTime() {
+        if (this.heldTime !== null) return Math.max(0, Math.min(this.heldTime, this.duration));
+
         const scrollDistance = this.offsetHeight - this.stage.offsetHeight;
         if (scrollDistance <= 0) return 0;
 
@@ -133,7 +187,9 @@ if (!customElements.get('interactive-video')) {
       }
 
       wake() {
-        if (this.frameId !== null || !this.isVisible || !this.duration || !this.mediaQuery.matches) return;
+        if (this.frameId !== null || this.hasFailed || !this.isVisible || !this.duration || !this.mediaQuery.matches) {
+          return;
+        }
         this.frameId = window.requestAnimationFrame(this.tick);
       }
 

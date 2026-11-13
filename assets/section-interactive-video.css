@@ -1,8 +1,9 @@
 /*
   Interactive Video — styles for sections/section-interactive-video.liquid.
 
-  The pinned stage only exists at 990px and up. Below that the section shows images
-  and a text list instead, so the stage stays hidden and its lazy poster isn't fetched.
+  The pinned stage only exists at 990px and up, with motion allowed. Below that the section
+  shows images and a text list instead, so the stage stays hidden and its lazy poster isn't
+  fetched. The fallback layout at the end of this file covers everything else.
 */
 .interactive-video {
   --video-ratio: 16 / 9;
@@ -13,7 +14,7 @@
   display: none;
 }
 
-@media screen and (min-width: 990px) {
+@media screen and (min-width: 990px) and (prefers-reduced-motion: no-preference) {
   /* Scroll distance is the area's height minus the stage's 100vh. */
   .interactive-video--short {
     height: 200vh;
@@ -88,7 +89,8 @@
   transition: opacity 0.6s ease;
 }
 
-.interactive-video.is-ready .interactive-video__tooltip.is-visible {
+.interactive-video.is-ready .interactive-video__tooltip.is-visible,
+.interactive-video__tooltip.is-selected {
   opacity: 1;
 }
 
@@ -177,5 +179,68 @@
     padding: 0;
     border: 0;
     clip: rect(0 0 0 0);
+  }
+}
+
+.interactive-video__empty {
+  margin: 0;
+}
+
+/*
+  Fallback layout, 990px and up: no pinning, just the fallback image and the tooltip list.
+  Used for a blank or broken video URL (--fallback), JavaScript turned off (html.no-js),
+  and reduced motion. Reduced motion needs its own media query, so its rules are repeated.
+*/
+.interactive-video__fallback {
+  display: none;
+}
+
+.interactive-video__fallback-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+@media screen and (min-width: 990px) {
+  .interactive-video.interactive-video--fallback,
+  html.no-js .interactive-video {
+    height: auto;
+  }
+
+  .interactive-video--fallback .interactive-video__stage,
+  html.no-js .interactive-video__stage {
+    display: none;
+  }
+
+  .interactive-video--fallback .interactive-video__fallback,
+  html.no-js .interactive-video__fallback {
+    display: block;
+  }
+
+  .interactive-video--fallback .interactive-video__desktop-list .interactive-video__list,
+  html.no-js .interactive-video__desktop-list .interactive-video__list {
+    position: static;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    margin: 3rem 0 0;
+    clip: auto;
+  }
+}
+
+@media screen and (min-width: 990px) and (prefers-reduced-motion: reduce) {
+  .interactive-video .interactive-video__fallback {
+    display: block;
+  }
+
+  .interactive-video .interactive-video__desktop-list .interactive-video__list {
+    position: static;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    margin: 3rem 0 0;
+    clip: auto;
   }
 }

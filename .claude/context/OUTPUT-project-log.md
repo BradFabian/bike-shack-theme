@@ -137,4 +137,6 @@ Steps 2–4 are built and uncommitted. Details are in the plan's Implementation 
 
 **Why not full mobile positioning:** at 375px a desktop-style overlay leaves about 105px for text, covers the product, and doubles the setup work per tooltip. Picking an image gives the client control without any of that.
 
+**Update, same day:** mobile placement passed QA. Steps 7 (fallbacks for a blank or broken URL, no JS, and reduced motion) and 8 (in the editor, selecting a tooltip holds the video at its start time) are built and awaiting browser QA.
+
 **Watch:** the tooltip text now renders in two copies (mobile and desktop/screen reader), each hidden at the other breakpoint. Any new tooltip field needs adding to the shared snippet `interactive-video-tooltip-text.liquid`, not to the section.

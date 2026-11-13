@@ -108,6 +108,7 @@ Status: Testing
 - [ ] All setting labels are readable text (no raw `t:sections…` keys)
 - [ ] A decimal time such as 2.5 saves and works
 - [ ] Selecting a tooltip block jumps to that tooltip's start time and shows it
+- [ ] While a tooltip block is selected, the video holds at its start time; after clicking away, scrolling controls the video again
 - [ ] Moving a tooltip's sliders updates the preview
 - [ ] Adding, reordering, and removing tooltip blocks causes no errors
 - [ ] The limit of 8 tooltips is enforced

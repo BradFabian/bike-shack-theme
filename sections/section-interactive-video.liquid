@@ -23,8 +23,19 @@
 {%- liquid
   assign video_url = section.settings.video_url | strip
   assign fallback = section.settings.fallback_image | default: section.settings.mobile_image_1
+
+  assign has_content = false
+  if video_url != blank or fallback != blank or section.settings.mobile_image_2 != blank or section.settings.mobile_image_3 != blank or section.settings.heading != blank or section.blocks.size > 0
+    assign has_content = true
+  endif
 -%}
 
+{%- comment -%}
+  Without a video URL, the fallback layout (image + list) is used on desktop from the start.
+  JS adds the same class if the video fails to load. Reduced motion and no-JS get the
+  same layout through CSS.
+{%- endcomment -%}
+{%- if has_content -%}
 <div class="interactive-video-section color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
   {%- unless section.settings.heading == blank -%}
     <div class="page-width">
@@ -37,7 +48,7 @@
   {%- endunless -%}
 
   <interactive-video
-    class="interactive-video{% if video_url != blank %} interactive-video--{{ section.settings.scroll_length }}{% endif %}"
+    class="interactive-video{% if video_url != blank %} interactive-video--{{ section.settings.scroll_length }}{% else %} interactive-video--fallback{% endif %}"
     data-video-url="{{ video_url | escape }}"
   >
     {%- if video_url != blank -%}
@@ -87,6 +98,20 @@
             {%- endif -%}
           {%- endfor -%}
         </div>
+      </div>
+    {%- endif -%}
+
+    {%- if fallback != blank -%}
+      <div class="interactive-video__fallback page-width">
+        {{
+          fallback
+          | image_url: width: 1920
+          | image_tag:
+            class: 'interactive-video__fallback-image',
+            widths: '750, 1100, 1500, 1920',
+            sizes: '100vw',
+            loading: 'lazy'
+        }}
       </div>
     {%- endif -%}
 
@@ -177,6 +202,13 @@
     {%- endif -%}
   </interactive-video>
 </div>
+{%- elsif request.design_mode -%}
+  <div class="interactive-video-section color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
+    <div class="page-width">
+      <p class="interactive-video__empty">{{ 'sections.interactive_video.empty' | t }}</p>
+    </div>
+  </div>
+{%- endif -%}
 
 {% schema %}
 {

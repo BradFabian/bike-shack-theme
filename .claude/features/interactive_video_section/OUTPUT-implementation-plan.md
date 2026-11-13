@@ -404,3 +404,12 @@ Video URL: `https://cdn.shopify.com/videos/c/o/v/5ed94fa7f455407fa1ed82dd4fa6e43
 - New snippet `snippets/interactive-video-tooltip-text.liquid` renders a tooltip's title and text for all three places.
 - Step 7 note: the desktop fallback layout should make `.interactive-video__desktop-list` visible.
 - This replaces the Open Questions item on mobile tooltips.
+- User QA on the unpublished theme: passed. With three images set, each tooltip showed under its image.
+
+### Steps 7 and 8: Fallbacks and theme editor (2026-11-13) — built, awaiting browser check
+
+- Blank URL: Liquid adds `interactive-video--fallback`. Video `error`: JS adds the same class and stops for good. No JS: `html.no-js` rules (the theme's existing class). Reduced motion: the pinned rules now sit inside `prefers-reduced-motion: no-preference`, and a separate `reduce` block shows the fallback image and list.
+- Fallback layout at 990px and up: no pinning, the fallback image at its natural size (capped at the page width, centred), and the desktop list made visible.
+- Nothing to show: the editor hint `sections.interactive_video.empty` in `request.design_mode`; nothing at all on the live site, not even the padding.
+- Editor: holding the video at the start time was chosen over scrolling the page, because the editor scrolls to selected blocks itself and the two would fight. The plan listed both, and this is the more predictable one. `shopify:block:select` and `shopify:block:deselect` listeners are added on the element in `designMode` only and removed on disconnect.
+- Not yet known: whether the editor re-selects a block after a setting change re-renders the section. If it doesn't, the hold is lost after each slider change, and the tooltip only shows when scrolled to.
