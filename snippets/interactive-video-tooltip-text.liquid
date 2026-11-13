@@ -1,0 +1,17 @@
+{% comment %}
+  Renders a tooltip block's title and text.
+  Used by sections/section-interactive-video.liquid for the on-video tooltips and both lists.
+
+  Accepts:
+  - block: {Object} A tooltip block
+
+  Usage:
+  {% render 'interactive-video-tooltip-text', block: block %}
+{% endcomment %}
+
+{%- if block.settings.title != blank -%}
+  <p class="interactive-video__title">{{ block.settings.title | escape }}</p>
+{%- endif -%}
+{%- if block.settings.text != blank -%}
+  <p class="interactive-video__text">{{ block.settings.text | escape }}</p>
+{%- endif -%}

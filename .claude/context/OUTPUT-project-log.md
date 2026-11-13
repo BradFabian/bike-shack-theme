@@ -89,3 +89,54 @@ Changed the `products_per_page` default from 24 to 8, at the user's request. Thi
 - Which review app the store uses wasn't recorded. Stars depend on the `reviews.rating` metafields.
 - The Round 2 boxes weren't ticked individually, so there's no per-item record of the Safari and iOS checks.
 
+
+## 2026-11-03 — Scoped: Interactive Video
+
+**Feature:** `.claude/features/interactive_video_section/`, on branch `feature/interactive-video-section`. A new section with a silent video scrubbed by scroll, modelled on Apple's AirPods 4 page, with timed tooltips set as blocks.
+
+**Key decisions:**
+- A real `<video>` over an image sequence (the client can swap one file) and over autoplay (scroll-driven playback is the core request).
+- Video only at 990px and up. Below that, three images plus the tooltip text as a list, and the video file is never requested.
+- Broken video URL or reduced motion: no pinning, just a fallback image and the tooltip text.
+
+**Risk:** smooth scrubbing depends on special encoding, and it isn't confirmed that a pasted Shopify CDN link delivers that exact file. Test this first.
+
+**Open:** the final video file isn't in the repo yet, and its background colour is unconfirmed (it must match a colour scheme).
+
+## 2026-11-03 — Planned: Interactive Video
+
+The implementation plan and the Round 1 QA checklist are written. There are 9 build steps.
+
+**Video check:** the client file (6.57s, 1920×1080, 12.5 MB) already has a keyframe on all 197 frames, no audio, and is web optimised, so no re-encoding is needed. Its background is about `#1f1f21`, matching schemes 1 and 2, so that question is closed.
+
+**Design choices worth remembering:**
+- Tooltip positions are percentages of a box that keeps the video's shape, not of the screen, so they stay on the product.
+- The tooltip list is the single accessible copy; the on-video tooltips are `aria-hidden`.
+- A new seek only starts when the last one has finished, to protect Safari.
+- A soft edge fade hides small colour differences between the video and the background.
+
+**Gates:** Step 1 confirms the CDN serves the file unchanged. Step 4 is a go/no-go on smooth scrubbing in Chrome, Safari, and Firefox before tooltips are built.
+
+**Open:** tooltip copy from the client, and whether the `number` setting accepts decimals (tested in Step 2).
+
+## 2026-11-04 — Building: Interactive Video (Steps 1–4)
+
+Steps 2–4 are built and uncommitted. Details are in the plan's Implementation Notes.
+
+**Confirmed:** Shopify's CDN serves the video byte-for-byte unchanged, with range requests and open CORS. It's cached for a year, so a replacement video should be a new file with a new link.
+
+**Waiting on:** the Step 4 go/no-go on scrubbing in Chrome, Safari, and Firefox. Step 5 doesn't start until that passes. The pinning and decimal time checks are also still open.
+
+**Deferred until after QA:** the mobile images are 500×500, and `mobile-helmet-side.jpeg` shows faint video player controls. Decide then whether to export replacements from the video.
+
+## 2026-11-13 — Interactive Video: QA on unpublished theme, mobile tooltip placement
+
+**Status:** Steps 1–6 are built and the scrubbing gate passed in Chrome, Safari, and Firefox. The user's QA on an unpublished theme passed on desktop and mobile. Steps 7 (fallbacks) and 8 (editor support) are still to build.
+
+**Changes since the plan:** tooltip text is placed with X/Y percentages plus a horizontal line end (replacing a fixed left/right side), and the whole tooltip fades. On mobile, each tooltip picks which image its text sits under, or the end list.
+
+**Why not full mobile positioning:** at 375px a desktop-style overlay leaves about 105px for text, covers the product, and doubles the setup work per tooltip. Picking an image gives the client control without any of that.
+
+**Update, same day:** mobile placement passed QA. Steps 7 (fallbacks for a blank or broken URL, no JS, and reduced motion) and 8 (in the editor, selecting a tooltip holds the video at its start time) are built and awaiting browser QA.
+
+**Watch:** the tooltip text now renders in two copies (mobile and desktop/screen reader), each hidden at the other breakpoint. Any new tooltip field needs adding to the shared snippet `interactive-video-tooltip-text.liquid`, not to the section.

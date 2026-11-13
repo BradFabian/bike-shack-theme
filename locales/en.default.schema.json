@@ -692,6 +692,97 @@
         "name": "Custom Collection"
       }
     },
+    "interactive_video": {
+      "name": "Interactive Video",
+      "settings": {
+        "video_url": {
+          "label": "Video URL",
+          "info": "Paste the link from Content > Files. For smooth scrolling, the video must be encoded with every frame as a keyframe, and its background should match the color scheme."
+        },
+        "fallback_image": {
+          "label": "Fallback image",
+          "info": "Shows on desktop while the video loads, or if it can't play. Uses Mobile image 1 if empty."
+        },
+        "mobile_image_1": {
+          "label": "Mobile image 1",
+          "info": "Mobile images replace the video on phones and tablets."
+        },
+        "mobile_image_2": {
+          "label": "Mobile image 2"
+        },
+        "mobile_image_3": {
+          "label": "Mobile image 3"
+        },
+        "heading": {
+          "label": "Heading"
+        },
+        "scroll_length": {
+          "label": "Scroll length",
+          "options__1": {
+            "label": "Short"
+          },
+          "options__2": {
+            "label": "Medium"
+          },
+          "options__3": {
+            "label": "Long"
+          }
+        }
+      },
+      "blocks": {
+        "tooltip": {
+          "name": "Tooltip",
+          "settings": {
+            "title": {
+              "label": "Title",
+              "default": "Tooltip title"
+            },
+            "text": {
+              "label": "Text",
+              "info": "About 120 characters fits comfortably.",
+              "default": "Describe this feature of the product in a short sentence."
+            },
+            "start_time": {
+              "label": "Start time (seconds)",
+              "info": "When the tooltip appears in the video. Decimals such as 2.5 are allowed."
+            },
+            "end_time": {
+              "label": "End time (seconds)"
+            },
+            "position_x": {
+              "label": "Horizontal position (X)",
+              "info": "Where the tooltip's text sits on the video. 0% is the left edge and 100% is the right edge."
+            },
+            "position_y": {
+              "label": "Vertical position (Y)"
+            },
+            "line_end": {
+              "label": "Line end, horizontal",
+              "info": "Where the line stops on the video. The line runs straight across from the text."
+            },
+            "mobile_image": {
+              "label": "Mobile placement",
+              "info": "On phones and tablets, shows this tooltip's text under the chosen image. If that image is empty, the text goes in the list at the end.",
+              "options__1": {
+                "label": "Under mobile image 1"
+              },
+              "options__2": {
+                "label": "Under mobile image 2"
+              },
+              "options__3": {
+                "label": "Under mobile image 3"
+              },
+              "options__4": {
+                "label": "In the list at the end"
+              }
+            }
+          }
+        }
+      },
+      "presets": {
+        "name": "Interactive Video"
+      }
+    },
     "custom-liquid": {
       "name": "Custom Liquid",
       "settings": {

@@ -1,0 +1,246 @@
+/*
+  Interactive Video — styles for sections/section-interactive-video.liquid.
+
+  The pinned stage only exists at 990px and up, with motion allowed. Below that the section
+  shows images and a text list instead, so the stage stays hidden and its lazy poster isn't
+  fetched. The fallback layout at the end of this file covers everything else.
+*/
+.interactive-video {
+  --video-ratio: 16 / 9;
+  display: block;
+}
+
+.interactive-video__stage {
+  display: none;
+}
+
+@media screen and (min-width: 990px) and (prefers-reduced-motion: no-preference) {
+  /* Scroll distance is the area's height minus the stage's 100vh. */
+  .interactive-video--short {
+    height: 200vh;
+  }
+
+  .interactive-video--medium {
+    height: 300vh;
+  }
+
+  .interactive-video--long {
+    height: 400vh;
+  }
+
+  .interactive-video__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* Fits the whole video on screen and gives tooltips a box that keeps the video's shape. */
+.interactive-video__box {
+  position: relative;
+  width: min(100%, calc(100vh * var(--video-ratio)));
+  aspect-ratio: var(--video-ratio);
+}
+
+/* The soft edges stop a box showing where the video's background meets the section's. */
+.interactive-video__video,
+.interactive-video__poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent),
+    linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent),
+    linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.interactive-video__poster {
+  transition: opacity 0.4s ease;
+}
+
+.interactive-video.is-ready .interactive-video__poster {
+  opacity: 0;
+}
+
+/*
+  Tooltips fill the box, so their percentages stay on the same part of the video.
+  --position-x and --position-y are the centre of the text. The clamps keep the 28% wide
+  text inside the box when it's placed near an edge.
+*/
+.interactive-video__tooltip {
+  --text-centre: clamp(14%, var(--position-x), 86%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.interactive-video.is-ready .interactive-video__tooltip.is-visible,
+.interactive-video__tooltip.is-selected {
+  opacity: 1;
+}
+
+.interactive-video__tooltip-content {
+  position: absolute;
+  top: clamp(8rem, var(--position-y), calc(100% - 8rem));
+  left: calc(var(--text-centre) - 14%);
+  box-sizing: border-box;
+  width: 28%;
+  padding: 0 1.6rem;
+  transform: translateY(-50%);
+}
+
+/* Runs from the edge of the text to --line-end. A line end behind the text gets no line. */
+.interactive-video__tooltip-line {
+  position: absolute;
+  top: clamp(8rem, var(--position-y), calc(100% - 8rem));
+  height: 1px;
+  background: rgba(var(--color-foreground), 0.5);
+}
+
+.interactive-video__tooltip--line-right .interactive-video__tooltip-line {
+  left: calc(var(--text-centre) + 14%);
+  width: max(0%, calc(var(--line-end) - var(--text-centre) - 14%));
+}
+
+.interactive-video__tooltip--line-left .interactive-video__tooltip-line {
+  left: var(--line-end);
+  width: max(0%, calc(var(--text-centre) - 14% - var(--line-end)));
+}
+
+/* Shared by the tooltips and the list. */
+.interactive-video__title {
+  margin: 0 0 0.6rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgb(var(--color-foreground));
+}
+
+.interactive-video__text {
+  margin: 0;
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.interactive-video__mobile {
+  display: grid;
+  gap: 4rem;
+}
+
+.interactive-video__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.interactive-video__list {
+  display: grid;
+  gap: 2.4rem;
+}
+
+.interactive-video__image-group .interactive-video__list {
+  margin-top: 2rem;
+}
+
+.interactive-video__desktop-list {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  .interactive-video__mobile {
+    display: none;
+  }
+
+  .interactive-video__desktop-list {
+    display: block;
+  }
+
+  /* The on-video tooltips are aria-hidden, so screen readers read this copy instead. */
+  .interactive-video__desktop-list .interactive-video__list {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+  }
+}
+
+.interactive-video__empty {
+  margin: 0;
+}
+
+/*
+  Fallback layout, 990px and up: no pinning, just the fallback image and the tooltip list.
+  Used for a blank or broken video URL (--fallback), JavaScript turned off (html.no-js),
+  and reduced motion. Reduced motion needs its own media query, so its rules are repeated.
+*/
+.interactive-video__fallback {
+  display: none;
+}
+
+.interactive-video__fallback-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+@media screen and (min-width: 990px) {
+  .interactive-video.interactive-video--fallback,
+  html.no-js .interactive-video {
+    height: auto;
+  }
+
+  .interactive-video--fallback .interactive-video__stage,
+  html.no-js .interactive-video__stage {
+    display: none;
+  }
+
+  .interactive-video--fallback .interactive-video__fallback,
+  html.no-js .interactive-video__fallback {
+    display: block;
+  }
+
+  .interactive-video--fallback .interactive-video__desktop-list .interactive-video__list,
+  html.no-js .interactive-video__desktop-list .interactive-video__list {
+    position: static;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    margin: 3rem 0 0;
+    clip: auto;
+  }
+}
+
+@media screen and (min-width: 990px) and (prefers-reduced-motion: reduce) {
+  .interactive-video .interactive-video__fallback {
+    display: block;
+  }
+
+  .interactive-video .interactive-video__desktop-list .interactive-video__list {
+    position: static;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    margin: 3rem 0 0;
+    clip: auto;
+  }
+}

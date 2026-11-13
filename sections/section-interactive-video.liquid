@@ -1,0 +1,459 @@
+{% comment %}
+  Interactive Video — pins a silent video on desktop and scrubs it with scroll, with timed tooltips.
+  Spec: .claude/features/interactive_video_section/feature.md
+{% endcomment %}
+
+{{ 'section-interactive-video.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'interactive-video.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign video_url = section.settings.video_url | strip
+  assign fallback = section.settings.fallback_image | default: section.settings.mobile_image_1
+
+  assign has_content = false
+  if video_url != blank or fallback != blank or section.settings.mobile_image_2 != blank or section.settings.mobile_image_3 != blank or section.settings.heading != blank or section.blocks.size > 0
+    assign has_content = true
+  endif
+-%}
+
+{%- comment -%}
+  Without a video URL, the fallback layout (image + list) is used on desktop from the start.
+  JS adds the same class if the video fails to load. Reduced motion and no-JS get the
+  same layout through CSS.
+{%- endcomment -%}
+{%- if has_content -%}
+<div class="interactive-video-section color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
+  {%- unless section.settings.heading == blank -%}
+    <div class="page-width">
+      <div class="title-wrapper title-wrapper--no-top-margin">
+        <h2 class="title inline-richtext {{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
+      </div>
+    </div>
+  {%- endunless -%}
+
+  <interactive-video
+    class="interactive-video{% if video_url != blank %} interactive-video--{{ section.settings.scroll_length }}{% else %} interactive-video--fallback{% endif %}"
+    data-video-url="{{ video_url | escape }}"
+  >
+    {%- if video_url != blank -%}
+      <div class="interactive-video__stage">
+        <div class="interactive-video__box">
+          <video
+            class="interactive-video__video"
+            muted
+            playsinline
+            preload="none"
+            disablepictureinpicture
+            aria-hidden="true"
+            tabindex="-1"
+          ></video>
+          {%- if fallback != blank -%}
+            {{
+              fallback
+              | image_url: width: 1920
+              | image_tag:
+                class: 'interactive-video__poster',
+                alt: '',
+                widths: '750, 1100, 1500, 1920',
+                sizes: '100vw',
+                loading: 'lazy'
+            }}
+          {%- endif -%}
+
+          {%- for block in section.blocks -%}
+            {%- if block.settings.title != blank or block.settings.text != blank -%}
+              {%- assign line_direction = 'right' -%}
+              {%- if block.settings.line_end < block.settings.position_x -%}
+                {%- assign line_direction = 'left' -%}
+              {%- endif -%}
+              <div
+                class="interactive-video__tooltip interactive-video__tooltip--line-{{ line_direction }}"
+                data-start="{{ block.settings.start_time }}"
+                data-end="{{ block.settings.end_time }}"
+                style="--position-x: {{ block.settings.position_x }}%; --position-y: {{ block.settings.position_y }}%; --line-end: {{ block.settings.line_end }}%;"
+                aria-hidden="true"
+                {{ block.shopify_attributes }}
+              >
+                <span class="interactive-video__tooltip-line"></span>
+                <div class="interactive-video__tooltip-content">
+                  {%- render 'interactive-video-tooltip-text', block: block -%}
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if fallback != blank -%}
+      <div class="interactive-video__fallback page-width">
+        {{
+          fallback
+          | image_url: width: 1920
+          | image_tag:
+            class: 'interactive-video__fallback-image',
+            widths: '750, 1100, 1500, 1920',
+            sizes: '100vw',
+            loading: 'lazy'
+        }}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Below 990px: each image with the tooltips assigned to it underneath, then a list of the
+      rest. A tooltip goes to the list if it's set to the list or its image is empty.
+    {%- endcomment -%}
+    <div class="interactive-video__mobile">
+      {%- for i in (1..3) -%}
+        {%- assign image_key = 'mobile_image_' | append: i -%}
+        {%- assign mobile_image = section.settings[image_key] -%}
+        {%- if mobile_image != blank -%}
+          <div class="interactive-video__image-group">
+            {{
+              mobile_image
+              | image_url: width: 1500
+              | image_tag:
+                class: 'interactive-video__image',
+                widths: '375, 550, 750, 1100, 1500',
+                sizes: '100vw',
+                loading: 'lazy'
+            }}
+
+            {%- capture image_tooltips -%}
+              {%- for block in section.blocks -%}
+                {%- if block.settings.mobile_image == image_key -%}
+                  {%- if block.settings.title != blank or block.settings.text != blank -%}
+                    <li class="interactive-video__list-item">
+                      {%- render 'interactive-video-tooltip-text', block: block -%}
+                    </li>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+
+            {%- if image_tooltips != blank -%}
+              <div class="page-width">
+                <ul class="interactive-video__list list-unstyled" role="list">
+                  {{- image_tooltips -}}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- capture remaining_tooltips -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.title != blank or block.settings.text != blank -%}
+            {%- assign placed = false -%}
+            {%- if block.settings.mobile_image != 'list' and section.settings[block.settings.mobile_image] != blank -%}
+              {%- assign placed = true -%}
+            {%- endif -%}
+            {%- unless placed -%}
+              <li class="interactive-video__list-item">
+                {%- render 'interactive-video-tooltip-text', block: block -%}
+              </li>
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+
+      {%- if remaining_tooltips != blank -%}
+        <div class="page-width">
+          <ul class="interactive-video__list list-unstyled" role="list">
+            {{- remaining_tooltips -}}
+          </ul>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      990px and up: every tooltip in one list for screen readers, since the on-video tooltips
+      are aria-hidden. Hidden below 990px, where the lists above are used instead.
+    {%- endcomment -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="page-width interactive-video__desktop-list">
+        <ul class="interactive-video__list list-unstyled" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.settings.title != blank or block.settings.text != blank -%}
+              <li class="interactive-video__list-item">
+                {%- render 'interactive-video-tooltip-text', block: block -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </interactive-video>
+</div>
+{%- elsif request.design_mode -%}
+  <div class="interactive-video-section color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
+    <div class="page-width">
+      <p class="interactive-video__empty">{{ 'sections.interactive_video.empty' | t }}</p>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.interactive_video.name",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "t:sections.interactive_video.settings.video_url.label",
+      "info": "t:sections.interactive_video.settings.video_url.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "t:sections.interactive_video.settings.fallback_image.label",
+      "info": "t:sections.interactive_video.settings.fallback_image.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_1",
+      "label": "t:sections.interactive_video.settings.mobile_image_1.label",
+      "info": "t:sections.interactive_video.settings.mobile_image_1.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_2",
+      "label": "t:sections.interactive_video.settings.mobile_image_2.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_3",
+      "label": "t:sections.interactive_video.settings.mobile_image_3.label"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:sections.interactive_video.settings.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "select",
+      "id": "scroll_length",
+      "options": [
+        {
+          "value": "short",
+          "label": "t:sections.interactive_video.settings.scroll_length.options__1.label"
+        },
+        {
+          "value": "medium",
+          "label": "t:sections.interactive_video.settings.scroll_length.options__2.label"
+        },
+        {
+          "value": "long",
+          "label": "t:sections.interactive_video.settings.scroll_length.options__3.label"
+        }
+      ],
+      "default": "medium",
+      "label": "t:sections.interactive_video.settings.scroll_length.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tooltip",
+      "name": "t:sections.interactive_video.blocks.tooltip.name",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "default": "t:sections.interactive_video.blocks.tooltip.settings.title.default",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.title.label"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "default": "t:sections.interactive_video.blocks.tooltip.settings.text.default",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.text.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.text.info"
+        },
+        {
+          "type": "number",
+          "id": "start_time",
+          "default": 2,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.start_time.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.start_time.info"
+        },
+        {
+          "type": "number",
+          "id": "end_time",
+          "default": 3,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.end_time.label"
+        },
+        {
+          "type": "range",
+          "id": "position_x",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 14,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.position_x.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.position_x.info"
+        },
+        {
+          "type": "range",
+          "id": "position_y",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.position_y.label"
+        },
+        {
+          "type": "range",
+          "id": "line_end",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50,
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.line_end.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.line_end.info"
+        },
+        {
+          "type": "select",
+          "id": "mobile_image",
+          "options": [
+            {
+              "value": "mobile_image_1",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__1.label"
+            },
+            {
+              "value": "mobile_image_2",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__2.label"
+            },
+            {
+              "value": "mobile_image_3",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__3.label"
+            },
+            {
+              "value": "list",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__4.label"
+            }
+          ],
+          "default": "list",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.info"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.interactive_video.presets.name",
+      "blocks": [
+        {
+          "type": "tooltip",
+          "settings": {
+            "start_time": 1.8,
+            "end_time": 3.2,
+            "position_x": 14,
+            "position_y": 35,
+            "line_end": 42,
+            "mobile_image": "mobile_image_1"
+          }
+        },
+        {
+          "type": "tooltip",
+          "settings": {
+            "start_time": 3.4,
+            "end_time": 4.9,
+            "position_x": 86,
+            "position_y": 50,
+            "line_end": 58,
+            "mobile_image": "mobile_image_2"
+          }
+        },
+        {
+          "type": "tooltip",
+          "settings": {
+            "start_time": 5,
+            "end_time": 6.4,
+            "position_x": 14,
+            "position_y": 70,
+            "line_end": 42,
+            "mobile_image": "mobile_image_3"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
