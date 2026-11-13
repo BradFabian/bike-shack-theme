@@ -128,3 +128,13 @@ Steps 2–4 are built and uncommitted. Details are in the plan's Implementation 
 **Waiting on:** the Step 4 go/no-go on scrubbing in Chrome, Safari, and Firefox. Step 5 doesn't start until that passes. The pinning and decimal time checks are also still open.
 
 **Deferred until after QA:** the mobile images are 500×500, and `mobile-helmet-side.jpeg` shows faint video player controls. Decide then whether to export replacements from the video.
+
+## 2026-11-13 — Interactive Video: QA on unpublished theme, mobile tooltip placement
+
+**Status:** Steps 1–6 are built and the scrubbing gate passed in Chrome, Safari, and Firefox. The user's QA on an unpublished theme passed on desktop and mobile. Steps 7 (fallbacks) and 8 (editor support) are still to build.
+
+**Changes since the plan:** tooltip text is placed with X/Y percentages plus a horizontal line end (replacing a fixed left/right side), and the whole tooltip fades. On mobile, each tooltip picks which image its text sits under, or the end list.
+
+**Why not full mobile positioning:** at 375px a desktop-style overlay leaves about 105px for text, covers the product, and doubles the setup work per tooltip. Picking an image gives the client control without any of that.
+
+**Watch:** the tooltip text now renders in two copies (mobile and desktop/screen reader), each hidden at the other breakpoint. Any new tooltip field needs adding to the shared snippet `interactive-video-tooltip-text.liquid`, not to the section.

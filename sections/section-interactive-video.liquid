@@ -81,12 +81,7 @@
               >
                 <span class="interactive-video__tooltip-line"></span>
                 <div class="interactive-video__tooltip-content">
-                  {%- if block.settings.title != blank -%}
-                    <p class="interactive-video__title">{{ block.settings.title | escape }}</p>
-                  {%- endif -%}
-                  {%- if block.settings.text != blank -%}
-                    <p class="interactive-video__text">{{ block.settings.text | escape }}</p>
-                  {%- endif -%}
+                  {%- render 'interactive-video-tooltip-text', block: block -%}
                 </div>
               </div>
             {%- endif -%}
@@ -95,36 +90,85 @@
       </div>
     {%- endif -%}
 
-    <div class="interactive-video__images">
+    {%- comment -%}
+      Below 990px: each image with the tooltips assigned to it underneath, then a list of the
+      rest. A tooltip goes to the list if it's set to the list or its image is empty.
+    {%- endcomment -%}
+    <div class="interactive-video__mobile">
       {%- for i in (1..3) -%}
         {%- assign image_key = 'mobile_image_' | append: i -%}
         {%- assign mobile_image = section.settings[image_key] -%}
         {%- if mobile_image != blank -%}
-          {{
-            mobile_image
-            | image_url: width: 1500
-            | image_tag:
-              class: 'interactive-video__image',
-              widths: '375, 550, 750, 1100, 1500',
-              sizes: '100vw',
-              loading: 'lazy'
-          }}
+          <div class="interactive-video__image-group">
+            {{
+              mobile_image
+              | image_url: width: 1500
+              | image_tag:
+                class: 'interactive-video__image',
+                widths: '375, 550, 750, 1100, 1500',
+                sizes: '100vw',
+                loading: 'lazy'
+            }}
+
+            {%- capture image_tooltips -%}
+              {%- for block in section.blocks -%}
+                {%- if block.settings.mobile_image == image_key -%}
+                  {%- if block.settings.title != blank or block.settings.text != blank -%}
+                    <li class="interactive-video__list-item">
+                      {%- render 'interactive-video-tooltip-text', block: block -%}
+                    </li>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+
+            {%- if image_tooltips != blank -%}
+              <div class="page-width">
+                <ul class="interactive-video__list list-unstyled" role="list">
+                  {{- image_tooltips -}}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
         {%- endif -%}
       {%- endfor -%}
+
+      {%- capture remaining_tooltips -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.title != blank or block.settings.text != blank -%}
+            {%- assign placed = false -%}
+            {%- if block.settings.mobile_image != 'list' and section.settings[block.settings.mobile_image] != blank -%}
+              {%- assign placed = true -%}
+            {%- endif -%}
+            {%- unless placed -%}
+              <li class="interactive-video__list-item">
+                {%- render 'interactive-video-tooltip-text', block: block -%}
+              </li>
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+
+      {%- if remaining_tooltips != blank -%}
+        <div class="page-width">
+          <ul class="interactive-video__list list-unstyled" role="list">
+            {{- remaining_tooltips -}}
+          </ul>
+        </div>
+      {%- endif -%}
     </div>
 
+    {%- comment -%}
+      990px and up: every tooltip in one list for screen readers, since the on-video tooltips
+      are aria-hidden. Hidden below 990px, where the lists above are used instead.
+    {%- endcomment -%}
     {%- if section.blocks.size > 0 -%}
-      <div class="page-width">
+      <div class="page-width interactive-video__desktop-list">
         <ul class="interactive-video__list list-unstyled" role="list">
           {%- for block in section.blocks -%}
             {%- if block.settings.title != blank or block.settings.text != blank -%}
               <li class="interactive-video__list-item">
-                {%- if block.settings.title != blank -%}
-                  <p class="interactive-video__title">{{ block.settings.title | escape }}</p>
-                {%- endif -%}
-                {%- if block.settings.text != blank -%}
-                  <p class="interactive-video__text">{{ block.settings.text | escape }}</p>
-                {%- endif -%}
+                {%- render 'interactive-video-tooltip-text', block: block -%}
               </li>
             {%- endif -%}
           {%- endfor -%}
@@ -310,6 +354,31 @@
           "default": 50,
           "label": "t:sections.interactive_video.blocks.tooltip.settings.line_end.label",
           "info": "t:sections.interactive_video.blocks.tooltip.settings.line_end.info"
+        },
+        {
+          "type": "select",
+          "id": "mobile_image",
+          "options": [
+            {
+              "value": "mobile_image_1",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__1.label"
+            },
+            {
+              "value": "mobile_image_2",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__2.label"
+            },
+            {
+              "value": "mobile_image_3",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__3.label"
+            },
+            {
+              "value": "list",
+              "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.options__4.label"
+            }
+          ],
+          "default": "list",
+          "label": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.label",
+          "info": "t:sections.interactive_video.blocks.tooltip.settings.mobile_image.info"
         }
       ]
     }
@@ -325,7 +394,8 @@
             "end_time": 3.2,
             "position_x": 14,
             "position_y": 35,
-            "line_end": 42
+            "line_end": 42,
+            "mobile_image": "mobile_image_1"
           }
         },
         {
@@ -335,7 +405,8 @@
             "end_time": 4.9,
             "position_x": 86,
             "position_y": 50,
-            "line_end": 58
+            "line_end": 58,
+            "mobile_image": "mobile_image_2"
           }
         },
         {
@@ -345,7 +416,8 @@
             "end_time": 6.4,
             "position_x": 14,
             "position_y": 70,
-            "line_end": 42
+            "line_end": 42,
+            "mobile_image": "mobile_image_3"
           }
         }
       ]

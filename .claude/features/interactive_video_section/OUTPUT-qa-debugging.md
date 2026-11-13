@@ -75,7 +75,11 @@ Status: Testing
 ### Tablet and mobile
 
 - [ ] At 800px and 375px: no pinning, three images stacked vertically
-- [ ] The tooltip titles and text show as a list below the images
+- [ ] A tooltip set to "Under mobile image 1/2/3" shows its text directly under that image
+- [ ] A tooltip set to "In the list at the end", or to an image that's empty, shows in the list after the last image
+- [ ] Several tooltips on one image all show under it, in block order
+- [ ] With every tooltip assigned to an image, no empty list appears at the end
+- [ ] At 990px and up, none of the mobile text is visible, and a screen reader still reads each tooltip once
 - [ ] The video isn't requested below 990px (check the DevTools Network tab)
 - [ ] The fallback image isn't downloaded separately below 990px, unless it's also Mobile image 1
 - [ ] No horizontal scroll at 375px

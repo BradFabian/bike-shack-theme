@@ -342,7 +342,7 @@ No templates, Dawn core JS/CSS, or existing snippets are modified.
 - Tooltip copy and count from the client. Not a blocker; placeholder text works during the build.
 - Mobile images: use the three `mobile-helmet-*.jpeg` files in `reference/` for now. Decide after QA whether to export 1080×1080 replacements from the video, because these are 500×500 and `mobile-helmet-side.jpeg` shows faint video player controls.
 - Fallback image: not chosen yet.
-- Mobile tooltips: the user wants to rethink the list below the images (2026-11-04), pending their deeper QA. This could change Step 6's list and the Step 7 fallback layout, which reuses it.
+- ~~Mobile tooltips: rethink the list below the images.~~ Resolved 2026-11-13: per-tooltip "Mobile placement" setting (see Implementation Notes).
 - Whether the `number` setting accepts decimals (answered in Step 2).
 
 ## Implementation Notes
@@ -394,3 +394,13 @@ Video URL: `https://cdn.shopify.com/videos/c/o/v/5ed94fa7f455407fa1ed82dd4fa6e43
 - The line stays horizontal, at the text's height, and its direction comes from whether `line_end` is left or right of `position_x`. Alternative considered: a separate line target X and Y with an angled line, which would add a fourth slider and more drawing code. Not built unless QA asks for it.
 - The whole tooltip now fades over 0.6s, replacing the text's slide and the line's draw-in.
 - The fade is time-based, so a fast scroll past a tooltip still shows a brief partial fade.
+
+### Mobile tooltip placement (2026-11-13) — user request after QA on the unpublished theme
+
+- The user's QA passed on desktop and mobile. Their one request: mobile tooltips should be configurable like desktop.
+- Chosen (user picked the recommended option): one `mobile_image` select per tooltip, placing its text under mobile image 1, 2, or 3, or in the list at the end (default). Rejected: a full desktop-style overlay on mobile (4 more settings, about 105px of text width at 375px, covers the helmet, every tooltip positioned twice) and an image plus pointer dot (3 more settings, still positioned twice).
+- A tooltip assigned to an empty image falls back to the end list, so text is never lost.
+- Markup is now two copies: `.interactive-video__mobile` (images, captions, remaining list; hidden at 990px and up) and `.interactive-video__desktop-list` (all tooltips, visually hidden at 990px and up for screen readers; `display: none` below). Each viewport exposes the text once.
+- New snippet `snippets/interactive-video-tooltip-text.liquid` renders a tooltip's title and text for all three places.
+- Step 7 note: the desktop fallback layout should make `.interactive-video__desktop-list` visible.
+- This replaces the Open Questions item on mobile tooltips.

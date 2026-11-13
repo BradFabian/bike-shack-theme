@@ -134,9 +134,9 @@
   color: rgba(var(--color-foreground), 0.75);
 }
 
-.interactive-video__images {
+.interactive-video__mobile {
   display: grid;
-  gap: 2rem;
+  gap: 4rem;
 }
 
 .interactive-video__image {
@@ -148,16 +148,27 @@
 .interactive-video__list {
   display: grid;
   gap: 2.4rem;
-  margin-top: 3rem;
+}
+
+.interactive-video__image-group .interactive-video__list {
+  margin-top: 2rem;
+}
+
+.interactive-video__desktop-list {
+  display: none;
 }
 
 @media screen and (min-width: 990px) {
-  .interactive-video__images {
+  .interactive-video__mobile {
     display: none;
   }
 
+  .interactive-video__desktop-list {
+    display: block;
+  }
+
   /* The on-video tooltips are aria-hidden, so screen readers read this copy instead. */
-  .interactive-video__list {
+  .interactive-video__desktop-list .interactive-video__list {
     position: absolute;
     overflow: hidden;
     width: 1px;
